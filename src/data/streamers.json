@@ -1,0 +1,44 @@
+[
+  {
+    "id": "benyiivt",
+    "name": "Benyiivt",
+    "bio": "Jugador profesional de shooters y amante de los simuladores. Parte de D7D.",
+    "image": "/streamers/benyiivt.jpg",
+    "socials": {
+      "twitch": "https://twitch.tv/benyiivt",
+      "twitter": "#",
+      "instagram": "#"
+    }
+  },
+  {
+    "id": "rubius",
+    "name": "Rubius",
+    "bio": "Leyenda del internet. Variedad, humor y grandes eventos.",
+    "image": "/streamers/rubius.jpg",
+    "socials": {
+      "twitch": "https://twitch.tv/rubius",
+      "twitter": "https://twitter.com/rubiu5",
+      "youtube": "https://youtube.com/elrubiusomg"
+    }
+  },
+  {
+    "id": "ibai",
+    "name": "Ibai",
+    "bio": "Caster, organizador de eventos y streamer del año.",
+    "image": "/streamers/ibai.jpg",
+    "socials": {
+      "twitch": "https://twitch.tv/ibai",
+      "twitter": "https://twitter.com/ibaillanos"
+    }
+  },
+  {
+    "id": "shroud",
+    "name": "Shroud",
+    "bio": "El aim humano. Conocido por su habilidad mecánica en cualquier FPS.",
+    "image": "/streamers/shroud.jpg",
+    "socials": {
+      "twitch": "https://twitch.tv/shroud",
+      "twitter": "https://twitter.com/shroud"
+    }
+  }
+]

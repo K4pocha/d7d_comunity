@@ -1,15 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, User } from "lucide-react";
+import Link from "next/link";
 import { checkTwitchStatus } from "../app/actions";
+// 1. IMPORTAMOS EL JSON PARA AUTOMATIZAR LA LISTA
+import streamersData from "../data/streamers.json";
 
-// LISTA DE STREAMERS A MONITOREAR
-const TEAM_ROSTER = [
-  "xopxsam", 
-  "shroud",       
-  "ibai",  
-  "d7d_official"
-];
+// 2. GENERAMOS LA LISTA DE IDs AUTOMÁTICAMENTE DESDE EL JSON
+// Esto crea un array tipo ["benyiivt", "rubius", "ibai"] sin que tú lo escribas
+const TEAM_ROSTER = streamersData.map(streamer => streamer.id);
 
 export default function StreamBar() {
   const [isVisible, setIsVisible] = useState(true);
@@ -17,57 +16,61 @@ export default function StreamBar() {
   const [currentIndex, setCurrentIndex] = useState(0); 
   const [loading, setLoading] = useState(true);
 
-  // 1. CARGA DE DATOS (Al inicio y cada 2 mins)
+  // CARGA DE DATOS (API TWITCH)
   useEffect(() => {
     async function fetchStream() {
+      // Usamos la lista generada del JSON
       const data = await checkTwitchStatus(TEAM_ROSTER);
       setStreams(data || []);
       setLoading(false);
     }
     fetchStream();
+    // Actualiza cada 2 minutos
     const interval = setInterval(fetchStream, 120000); 
     return () => clearInterval(interval);
   }, []);
 
-  // 2. ROTACIÓN AUTOMÁTICA (CARRUSEL)
+  // CARRUSEL AUTOMÁTICO (Si hay más de 1 stream)
   useEffect(() => {
     if (streams.length > 1) {
       const rotationInterval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % streams.length);
-      }, 5000); // Cambia cada 5 segundos
+      }, 5000); // Rota cada 5 segundos
       return () => clearInterval(rotationInterval);
     }
   }, [streams]);
 
-  // FUNCIONES MANUALES
   const nextStream = () => setCurrentIndex((prev) => (prev + 1) % streams.length);
   const prevStream = () => setCurrentIndex((prev) => (prev - 1 + streams.length) % streams.length);
 
-  // SI NO HAY STREAM O SE CERRÓ, NO RENDERIZAR NADA
+  // Si no hay stream, está cargando o el usuario la cerró, no mostramos nada
   if (loading || streams.length === 0 || !isVisible) return null;
 
   const activeStream = streams[currentIndex];
 
   return (
-    <div className="fixed top-20 w-full z-40 bg-sk-dark border-b border-white/10 animate-fade-in shadow-lg shadow-sk-accent/10 transition-all duration-500">
+    // CONTENEDOR PRINCIPAL
+    // - relative z-[51]: Para estar encima del navbar pero dentro del header
+    // - shadow-[...]: El efecto GLOW del color del tema hacia abajo
+    <div className="w-full bg-[#0a0a0a] border-b border-white/10 relative z-[51] transition-all duration-500 shadow-[0_10px_30px_-10px_var(--color-sk-accent)]">
       
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-2">
         
         {/* --- IZQUIERDA: INDICADORES E INFO --- */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0">
           
-          {/* Indicador LIVE (Rojo fijo) */}
-          <div className="flex items-center gap-2 min-w-[60px]">
+          {/* Indicador LIVE (Con padding izquierdo 'pl-1' para que la animación no se corte) */}
+          <div className="flex items-center gap-2 flex-shrink-0 pl-1">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
             </span>
-            <span className="font-bold text-red-500 uppercase tracking-widest text-sm">Live</span>
+            <span className="font-bold text-red-500 uppercase tracking-widest text-xs sm:text-sm">Live</span>
           </div>
 
-          {/* Flechas (Solo si hay más de 1 en vivo) */}
+          {/* Flechas de navegación (Solo si hay varios streams) */}
           {streams.length > 1 && (
-            <div className="flex gap-1 border-r border-white/10 pr-3 mr-1">
+            <div className="hidden sm:flex gap-1 border-r border-white/10 pr-3 mr-1 flex-shrink-0">
               <button onClick={prevStream} className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors">
                 <ChevronLeft size={16}/>
               </button>
@@ -77,41 +80,48 @@ export default function StreamBar() {
             </div>
           )}
 
-          {/* Info del Streamer */}
-          <div className="flex flex-col md:flex-row md:items-center md:gap-3 transition-opacity duration-300">
-            <span className="font-bold text-xl uppercase italic text-white">
+          {/* Info del Streamer (Nombre y Juego) */}
+          <div className="flex items-center gap-2 overflow-hidden truncate">
+            <span className="font-black text-lg text-white uppercase italic tracking-tighter flex-shrink-0">
               {activeStream.streamer}
             </span>
-            <span className="text-gray-400 text-sm font-body hidden md:block border-l border-white/20 pl-3 ml-1">
-              jugando 
-              {/* AQUÍ ESTÁ EL CAMBIO: text-sk-accent se adapta al tema */}
-              <span className="text-sk-accent font-bold ml-1 uppercase">{activeStream.game}</span> 
-              <span className="ml-2 text-xs bg-white/10 px-2 py-0.5 rounded text-gray-300 font-mono">
+            
+            <div className="hidden md:flex items-center text-sm text-gray-400 border-l border-white/20 pl-3 ml-1 overflow-hidden">
+              <span className="flex-shrink-0">jugando</span>
+              <span className="text-sk-accent font-bold ml-1 uppercase truncate">
+                {activeStream.game}
+              </span> 
+              <span className="ml-2 text-xs bg-white/10 px-2 py-0.5 rounded text-gray-300 font-mono flex-shrink-0">
                 👥 {activeStream.viewers}
               </span>
-            </span>
+            </div>
           </div>
         </div>
 
-        {/* --- DERECHA: BOTONES --- */}
-        <div className="flex items-center gap-4">
-          {/* Contador (Ej: 1/2) */}
-          {streams.length > 1 && (
-            <span className="text-xs text-gray-500 font-mono hidden sm:block">
-              {currentIndex + 1} / {streams.length}
-            </span>
-          )}
+        {/* --- DERECHA: BOTONES DE ACCIÓN --- */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          
+          {/* BOTÓN 1: PERFIL (Lleva a la tarjeta modal en /streamers) */}
+          <Link 
+            href={`/streamers?id=${activeStream.streamer.toLowerCase()}`}
+          >
+            <button className="hidden sm:flex items-center gap-2 border border-white/20 hover:border-white text-gray-300 hover:text-white px-3 py-1 rounded-sm text-xs font-bold uppercase transition-all duration-300">
+                <User size={14} />
+                Perfil
+            </button>
+          </Link>
 
+          {/* BOTÓN 2: VER STREAM (Lleva a Twitch) */}
           <a 
             href={activeStream.url} 
             target="_blank" 
-            // AQUÍ ESTÁ EL CAMBIO: bg-sk-accent cambia el fondo del botón según el tema
-            className="bg-sk-accent hover:brightness-110 text-white px-6 py-1 rounded text-sm font-bold uppercase skew-x-[-10deg] transition-all duration-300 shadow-[0_0_10px_rgba(0,0,0,0.3)]"
+            className="bg-sk-accent hover:brightness-110 text-white px-4 py-1 rounded-sm text-xs font-bold uppercase transition-all duration-300 shadow-[0_0_10px_rgba(0,0,0,0.3)] whitespace-nowrap"
           >
-            <span className="block skew-x-[10deg]">Ver Stream</span>
+            Ver Stream
           </a>
           
-          <button onClick={() => setIsVisible(false)} className="text-gray-500 hover:text-white transition-colors">
+          {/* BOTÓN CERRAR */}
+          <button onClick={() => setIsVisible(false)} className="text-gray-500 hover:text-white transition-colors ml-2">
             <X size={18} />
           </button>
         </div>
