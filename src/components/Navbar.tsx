@@ -4,15 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown, User } from "lucide-react";
+import StreamBar from "./StreamBar";
 import MegaMenu from "./MegaMenu";
 import ThemeToggle from "../components/ThemeToggle";
-import dynamic from 'next/dynamic';
-
-// Importación dinámica: No se carga hasta que el navegador esté listo
-const StreamBar = dynamic(() => import('./StreamBar'), {
-  ssr: false, // Opcional: Si quieres que solo cargue en el cliente (evita errores de hidratación)
-  loading: () => <div className="h-10 w-full bg-[#0a0a0a]" />, // Un espacio vacío oscuro mientras carga
-});
 
 // Icono Discord SVG
 const DiscordIcon = () => (
@@ -27,12 +21,12 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
+    // Detectamos si el usuario bajó más de 50px
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // AQUÍ ESTÁ EL CAMBIO: Usamos 'text-sk-accent' en lugar de 'text-cyan-400'
   const navLinkClass = (path: string) =>
     `text-sm font-bold uppercase tracking-wider transition-colors duration-300 hover:text-sk-accent ${
       pathname === path ? "text-sk-accent" : "text-gray-300"
@@ -40,14 +34,25 @@ export default function Navbar() {
 
   return (
     <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-[#050505]/95 backdrop-blur-md shadow-lg border-b border-white/10" : "bg-transparent"
+      className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
+        scrolled 
+          ? "bg-[#050505]/95 backdrop-blur-md shadow-lg border-white/10" // Fondo oscuro al bajar
+          : "bg-transparent border-transparent" // Transparente arriba
       }`}
     >
-      <StreamBar />
+      
+      {/* TRUCO: Contenedor que colapsa su altura al hacer scroll.
+         - 'h-10': Altura normal de la barra.
+         - 'h-0': Altura cero (se esconde).
+         - 'overflow-hidden': Para que el contenido no se salga al cerrarse.
+      */}
+      <div className={`transition-all duration-500 ease-in-out overflow-hidden ${scrolled ? "h-0 opacity-0" : "h-10 opacity-100"}`}>
+        <StreamBar />
+      </div>
 
+      {/* NAVBAR PRINCIPAL (Siempre visible) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className={`flex items-center justify-between transition-all duration-300 ${scrolled ? "h-16" : "h-20"}`}>
           
           {/* LOGO */}
           <div className="flex-shrink-0">
@@ -57,7 +62,7 @@ export default function Navbar() {
                 alt="D7D Logo" 
                 width={140} 
                 height={50} 
-                className="h-12 w-auto object-contain hover:brightness-110 transition-all"
+                className={`w-auto object-contain hover:brightness-110 transition-all duration-300 ${scrolled ? "h-10" : "h-12"}`}
                 priority
               />
             </Link>
@@ -68,12 +73,10 @@ export default function Navbar() {
             <div className="ml-10 flex items-center space-x-8 h-full">
               <Link href="/" className={navLinkClass("/")}>Inicio</Link>
               
-              {/* MEGA MENÚ NOSOTROS */}
               <div className="group h-full flex items-center">
                 <Link 
                   href="/nosotros" 
-                  // AQUÍ TAMBIÉN: 'text-sk-accent'
-                  className={`flex items-center gap-1 text-sm font-bold uppercase tracking-wider transition-colors duration-300 hover:text-sk-accent cursor-pointer ${pathname.startsWith("/nosotros") ? "text-sk-accent" : "text-gray-300"}`}
+                  className={`flex items-center gap-1 text-sm font-bold uppercase tracking-wider transition-colors duration-300 hover:text-sk-accent group-hover:text-sk-accent cursor-pointer ${pathname.startsWith("/nosotros") ? "text-sk-accent" : "text-gray-300"}`}
                 >
                   Nosotros
                   <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
@@ -97,7 +100,6 @@ export default function Navbar() {
              <ThemeToggle />
              <Link
               href="/login"
-              // AQUÍ TAMBIÉN: bordes y textos con sk-accent
               className="border border-white/20 hover:border-sk-accent text-white hover:text-sk-accent px-4 py-1.5 rounded text-xs font-bold uppercase transition-all duration-300 flex items-center gap-2"
             >
               <User size={14} />
@@ -119,7 +121,6 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-[#050505] border-t border-white/10 absolute w-full h-screen overflow-y-auto animate-fade-in z-40">
           <div className="px-4 pt-4 pb-20 space-y-1 flex flex-col">
-            {/* AQUÍ TAMBIÉN: hover:text-sk-accent */}
             <Link href="/" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Inicio</Link>
             <Link href="/nosotros" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Nosotros</Link>
             <Link href="/equipos" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Equipos</Link>

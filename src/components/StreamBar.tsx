@@ -7,7 +7,7 @@ import { checkTwitchStatus } from "../app/actions";
 import streamersData from "../data/streamers.json";
 
 // 2. GENERAMOS LA LISTA DE IDs AUTOMÁTICAMENTE DESDE EL JSON
-// Esto crea un array tipo ["benyiivt", "rubius", "ibai"] sin que tú lo escribas
+// Esto crea un array tipo ["benyiivt", "rubius", "ibai"]
 const TEAM_ROSTER = streamersData.map(streamer => streamer.id);
 
 export default function StreamBar() {

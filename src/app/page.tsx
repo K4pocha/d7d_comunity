@@ -30,20 +30,18 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 text-center px-4 animate-fade-in max-w-5xl mx-auto">
-          {/* TEXTO SUPERIOR: Ahora usa text-sk-accent para cambiar de color */}
+          {/* TEXTO SUPERIOR */}
           <span className="text-sk-accent font-bold tracking-[0.5em] text-sm uppercase mb-6 block drop-shadow-sm transition-colors duration-500">
             Est 2010 • Reborn 2026
           </span>
           
-          {/* LOGO: Tamaño reducido y Glow dinámico */}
+          {/* LOGO */}
           <div className="mb-12 relative flex justify-center">
             <Image
               src="/LogoDisplaced.png"
               alt="D7D Logo"
               width={600}
               height={200}
-              // AQUÍ REDUJE EL TAMAÑO (max-w-[280px] y md:max-w-[550px])
-              // Y el drop-shadow ahora usa var(--color-sk-accent)
               className="w-full max-w-[280px] md:max-w-[550px] h-auto object-contain drop-shadow-[0_0_35px_var(--color-sk-accent)] transition-all duration-500"
               priority
             />
@@ -53,7 +51,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row gap-6 justify-center mt-8">
             
             <Link href="/equipos">
-                {/* BOTÓN COMUNIDAD: Ahora usa hover:bg-sk-accent */}
+                {/* BOTÓN COMUNIDAD */}
                 <button className="group relative bg-white text-black px-8 py-3 font-black text-xl uppercase hover:bg-sk-accent hover:text-white transition-all transform -skew-x-12 hover:scale-105 hover:shadow-[0_0_20px_var(--color-sk-accent)] duration-300">
                   <div className="flex items-center gap-3 transform skew-x-12">
                     <Users size={24} className="text-black group-hover:text-white transition-colors" />
@@ -66,7 +64,7 @@ export default function Home() {
                 href={socialLinks.discord} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                // BOTÓN DISCORD: Lo dejamos con su color de marca (#5865F2) porque es reconocible
+                // BOTÓN DISCORD
                 className="group relative bg-transparent border-2 border-white/30 text-white px-8 py-3 font-black text-xl uppercase transition-all transform -skew-x-12 hover:border-[#5865F2] hover:bg-[#5865F2] hover:shadow-[0_0_20px_rgba(88,101,242,0.6)]"
             >
               <div className="flex items-center gap-3 transform skew-x-12">

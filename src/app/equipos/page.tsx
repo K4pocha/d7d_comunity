@@ -5,7 +5,6 @@ const TEAMS = [
     game: "League of Legends",
     status: "PROXIMAMENTE",
     description: "División de League of Legends enfocada en alto rendimiento, disciplina y ejecución competitiva.",
-    // Asegúrate de tener estas imágenes o usa una genérica
     image: "/fondo.jpg", 
     logo: "/games/lol-logo.png"
   },
@@ -50,7 +49,6 @@ export default function EquiposPage() {
   return (
     <div className="min-h-screen pt-32 pb-20 px-4 bg-[#050505]">
       
-      {/* TITULO CORREGIDO: Ahora usa text-sk-accent */}
       <h1 className="text-center text-6xl font-black uppercase italic mb-16 tracking-tighter">
         Nuestras <span className="text-sk-accent">Divisiones</span>
       </h1>
@@ -68,8 +66,6 @@ export default function EquiposPage() {
 
             <div className="absolute inset-0 z-10 p-8 flex flex-col justify-end">
               
-              {/* ETIQUETA DE ESTADO CORREGIDA */}
-              {/* Usamos bg-sk-accent y var(--color-sk-accent) para la sombra */}
               <div className={`absolute top-6 right-6 px-3 py-1 text-xs font-bold uppercase tracking-widest skew-x-[-12deg] transition-colors duration-300 ${
                   team.status === "RECLUTANDO" 
                   ? "bg-sk-accent text-white shadow-[0_0_15px_var(--color-sk-accent)]" 
@@ -82,15 +78,11 @@ export default function EquiposPage() {
               <h3 className="text-3xl font-black uppercase italic text-white mb-2 group-hover:text-sk-accent transition-colors">
                 {team.game}
               </h3>
-              
-              {/* LÍNEA DECORATIVA CORREGIDA */}
               <div className="h-1 w-12 bg-sk-accent mb-4 group-hover:w-full transition-all duration-500"></div>
-              
               <p className="text-gray-400 text-sm leading-relaxed">
                 {team.description}
               </p>
 
-              {/* BOTÓN POSTULAR CORREGIDO */}
               {team.status === "RECLUTANDO" && (
                 <button className="mt-6 w-full py-3 border border-white/20 hover:bg-sk-accent hover:text-white hover:border-sk-accent font-bold uppercase transition-all duration-300">
                     Postular

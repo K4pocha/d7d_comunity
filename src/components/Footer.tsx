@@ -24,12 +24,9 @@ export default function Footer() {
 
         {/* TEXTO */}
         <div>
-          {/* CAMBIO: Agregué 'py-4' para darle espacio vertical al gradiente y que no corte la S */}
           <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-800 opacity-90 py-4 px-1 leading-normal">
             SIGUENOS 
-
           </h2>
-          {/* Ajusté el margen superior (mt-0) porque el py-4 ya agrega espacio */}
           <p className="text-gray-500 mt-0 uppercase tracking-widest text-sm px-3">Se parte de #DIsp7aceDNetwork</p>
         </div>
 

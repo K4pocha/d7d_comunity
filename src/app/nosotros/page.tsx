@@ -24,10 +24,10 @@ function AboutContent() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen pt-24 bg-[#050505] flex flex-col md:flex-row">
+    <div className="pt-24 bg-[#050505] min-h-screen flex flex-col md:flex-row">
       
       {/* 1. MENÚ LATERAL */}
-      <aside className="w-full md:w-1/4 p-8 md:fixed md:h-full overflow-y-auto border-r border-white/10 z-20 bg-[#050505]">
+      <aside className="w-full md:w-1/4 p-8 md:sticky md:h-full overflow-y-auto border-r border-white/10 z-20 bg-[#050505]">
         <h2 className="text-3xl font-black uppercase italic mb-8 text-sk-accent">Acerca De</h2>
         <nav className="flex flex-col gap-2">
           {SECTIONS.map((item) => (
@@ -47,7 +47,7 @@ function AboutContent() {
       </aside>
 
       {/* 2. CONTENIDO */}
-      <main className="w-full md:w-3/4 md:ml-[25%] p-8 md:p-16">
+      <main className="w-full md:w-3/4 p-8 md:p-16">
         
         {/* --- HISTORIA --- */}
         {activeSection === "historia" && (
