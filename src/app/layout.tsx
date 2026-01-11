@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-// 1. Importamos la fuente Oswald de Google
 import { Oswald, Inter } from "next/font/google"; 
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import StreamBar from "../components/StreamBar"; 
 import Footer from "../components/Footer";
+
 
 // Configuración de la fuente gruesa
 const oswald = Oswald({ 

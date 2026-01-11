@@ -1,5 +1,8 @@
+"use client";
+
 import { Twitter, Instagram, Youtube, Twitch, Facebook } from "lucide-react";
 import socialLinks from "../data/social-links.json";
+import { useEffect } from "react";
 
 const DiscordIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 127.14 96.36" fill="currentColor">
@@ -18,6 +21,18 @@ export default function Footer() {
 
   const activeNetworks = socialNetworks.filter(social => social.href && social.href !== "");
 
+  // EFECTO HACKER: Mensaje en la consola
+  useEffect(() => {
+    console.log(
+      "%c Developed by K4pocha",
+      "background: #000; color: #ec4899; font-size: 20px; font-weight: bold; padding: 10px; border: 2px solid #ec4899; border-radius: 5px;"
+    );
+    console.log(
+      "%c ¿Te gusta el código? Contáctame en github.com/k4pocha",
+      "color: #aaa; font-size: 12px;"
+    );
+  }, []);
+
   return (
     <footer className="bg-[#050505] border-t border-white/10 pt-20 pb-10 mt-auto">
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-10">
@@ -25,7 +40,7 @@ export default function Footer() {
         {/* TEXTO */}
         <div>
           <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-800 opacity-90 py-4 px-1 leading-normal">
-            SIGUENOS 
+            SIGUENOS
           </h2>
           <p className="text-gray-500 mt-0 uppercase tracking-widest text-sm px-3">Se parte de #DIsp7aceDNetwork</p>
         </div>
@@ -47,8 +62,26 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="text-center mt-20 text-gray-600 text-xs uppercase">
-        © 2026 DIsp7aceD Network. All rights reserved.
+      <div className="text-center mt-20 border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center px-4 gap-4">
+
+        {/* Copyright */}
+        <div className="text-gray-600 text-xs uppercase tracking-wider">
+          © 2026 Disp7aceD Network. All rights reserved.
+        </div>
+
+        {/* TU FIRMA */}
+        <a
+          href="https://k4pocha.vercel.app" 
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs uppercase font-bold tracking-widest text-gray-700 hover:text-sk-accent transition-colors duration-300 flex items-center gap-2 group"
+        >
+          <span>Developed by</span>
+          <span className="group-hover:underline decoration-sk-accent underline-offset-4">
+            K4pocha 
+          </span>
+        </a>
+
       </div>
     </footer>
   );
