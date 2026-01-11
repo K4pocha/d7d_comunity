@@ -4,9 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown, User } from "lucide-react";
-import StreamBar from "./StreamBar";
 import MegaMenu from "./MegaMenu";
 import ThemeToggle from "../components/ThemeToggle";
+import dynamic from 'next/dynamic';
+
+// Importación dinámica: No se carga hasta que el navegador esté listo
+const StreamBar = dynamic(() => import('./StreamBar'), {
+  ssr: false, // Opcional: Si quieres que solo cargue en el cliente (evita errores de hidratación)
+  loading: () => <div className="h-10 w-full bg-[#0a0a0a]" />, // Un espacio vacío oscuro mientras carga
+});
 
 // Icono Discord SVG
 const DiscordIcon = () => (
