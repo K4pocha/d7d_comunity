@@ -6,7 +6,8 @@
     "category": "Lanzamiento",
     "date": "11 Ene, 2026",
     "image": "/news/lanzamiento-web.jpg" ,
-    "slug": "lanzamiento-oficial"
+    "slug": "lanzamiento-oficial", 
+    "content": "<p>Hoy es un día histórico para el gaming en Chile. Disp7aceD Network abre sus puertas digitales...</p><p>Nuestra misión es clara: profesionalizar la escena.</p>"
   },
   {
     "id": 2,

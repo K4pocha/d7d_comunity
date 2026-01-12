@@ -58,7 +58,7 @@ export default function Navbar() {
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
               <Image 
-                src="/LogoDisplaced.png"
+                src="/LogoDisplacedCompleto.png"
                 alt="D7D Logo" 
                 width={140} 
                 height={50} 

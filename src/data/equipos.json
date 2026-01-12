@@ -1,0 +1,68 @@
+[
+  {
+    "id": "lol-main",
+    "game": "League of Legends",
+    "status": "PROXIMAMENTE",
+    "description": "División de League of Legends enfocada en alto rendimiento, disciplina y ejecución competitiva.",
+    "image": "/fondo.jpg", 
+    "logo": "/games/lol-logo.png",
+    "coach": "TBA",
+    "roster": []
+  },
+  {
+    "id": "valorant-main",
+    "game": "Valorant",
+    "status": "RECLUTANDO",
+    "description": "Equipo de Valorant orientado a precisión táctica, control total y mentalidad ganadora.",
+    "image": "/fondo.jpg",
+    "logo": "/games/val-logo.png",
+    "coach": "Viper",
+    "roster": [
+      { "nick": "K4POCHA", "role": "Duelist", "country": "CL" },
+      { "nick": "Silent", "role": "Sentinel", "country": "AR" },
+      { "nick": "RazeMain", "role": "Controller", "country": "CL" }
+    ]
+  },
+  {
+    "id": "cs2-main",
+    "game": "CS2",
+    "status": "PROXIMAMENTE",
+    "description": "División de CS2 basada en ejecución precisa, estrategia avanzada y consistencia competitiva.",
+    "image": "/fondo.jpg",
+    "logo": "/games/cs2-logo.png",
+    "coach": "TBA",
+    "roster": []
+  },
+  {
+    "id": "delta-force",
+    "game": "Delta Force",
+    "status": "RECLUTANDO",
+    "description": "División de Delta Force centrada en táctica militar, coordinación extrema y control del campo.",
+    "image": "/fondo.jpg",
+    "logo": "/games/delta-logo.png",
+    "coach": "Tactical",
+    "roster": []
+  },
+  {
+    "id": "rocket-league",
+    "game": "Rocket League",
+    "status": "PROXIMAMENTE",
+    "description": "Equipo de Rocket League enfocado en velocidad, precisión mecánica y dominio competitivo.",
+    "image": "/fondo.jpg",
+    "logo": "/games/rl-logo.png",
+    "coach": "TBA",
+    "roster": []
+  },
+  {
+    "id": "content-creators",
+    "game": "Creadores de Contenido",
+    "status": "RECLUTANDO",
+    "description": "Creadores de contenido enfocados en marca, constancia y proyección profesional.",
+    "image": "/fondo.jpg",
+    "logo": "/games/camera-logo.png",
+    "coach": "Manager",
+    "roster": [
+      { "nick": "Streamer1", "role": "Variety", "country": "CL" }
+    ]
+  }
+]
