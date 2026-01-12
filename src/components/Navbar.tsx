@@ -85,7 +85,6 @@ export default function Navbar() {
               </div>
 
               <Link href="/equipos" className={navLinkClass("/equipos")}>Equipos</Link>
-              <Link href="/streamers" className={navLinkClass("/streamers")}>Streamers</Link>
               <Link href="/partners" className={navLinkClass("/partners")}>Partners</Link>
               <Link href="/noticias" className={navLinkClass("/noticias")}>Noticias</Link>
             </div>
@@ -93,7 +92,7 @@ export default function Navbar() {
 
           {/* DERECHA */}
           <div className="hidden md:flex items-center gap-6">
-             <a href="https://discord.gg/tuserver" target="_blank" className="text-gray-400 hover:text-[#5865F2] transition-colors">
+             <a href="https://discord.gg/5b6epPJB82" target="_blank" className="text-gray-400 hover:text-[#5865F2] transition-colors">
                <DiscordIcon />
              </a>
              <div className="h-6 w-px bg-white/10"></div>
@@ -124,7 +123,6 @@ export default function Navbar() {
             <Link href="/" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Inicio</Link>
             <Link href="/nosotros" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Nosotros</Link>
             <Link href="/equipos" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Equipos</Link>
-            <Link href="/streamers" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Streamers</Link>
             <Link href="/partners" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Partners</Link>
             <Link href="/noticias" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 hover:text-sk-accent">Noticias</Link>
             <Link href="/login" onClick={() => setIsOpen(false)} className="px-3 py-4 text-xl font-bold uppercase border-b border-white/10 text-sk-accent">Iniciar Sesión</Link>
