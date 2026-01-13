@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     // 1. CORRECCIÓN PRINCIPAL:
     // Buscamos en la columna 'email' O en la columna 'nickname' usando el mismo valor dos veces.
     const [rows]: any = await pool.query(
-      "SELECT * FROM User WHERE email = ? OR nickname = ?", 
+      "SELECT * FROM user WHERE email = ? OR nickname = ?", 
       [email, email]
     );
 

@@ -53,7 +53,7 @@ export async function PUT(request: Request) {
 
         // Actualizamos solo los campos permitidos
         await pool.query(
-            `UPDATE User SET 
+            `UPDATE user SET 
         bio = ?, 
         cpu = ?, 
         gpu = ?, 

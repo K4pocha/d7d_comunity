@@ -12,10 +12,10 @@ export async function GET(
 
     // 2. Consulta a la Base de Datos
     const [rows]: any = await pool.query(
-      `SELECT News.*, User.nickname as author_name, User.avatar as author_avatar 
-       FROM News 
-       LEFT JOIN User ON News.author_id = User.id 
-       WHERE News.id = ?`,
+      `SELECT news.*, user.nickname as author_name, user.avatar as author_avatar 
+       FROM news 
+       LEFT JOIN user ON news.author_id = user.id 
+       WHERE news.id = ?`,
       [id]
     );
 

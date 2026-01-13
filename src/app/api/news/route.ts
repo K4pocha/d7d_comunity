@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
     // NUEVO: Guardamos la categoría en la BD
     await pool.query(
-      "INSERT INTO News (title, content, category, image, author_id) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO news (title, content, category, image, author_id) VALUES (?, ?, ?, ?, ?)",
       [title, content, category || "General", imageUrl, user.id]
     );
 
