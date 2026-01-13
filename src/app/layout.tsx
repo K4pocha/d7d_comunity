@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Oswald, Inter } from "next/font/google"; 
 import "./globals.css";
 import Navbar from "../components/Navbar";
-// import StreamBar from "../components/StreamBar"; <--- ELIMINADO (Ya está dentro de Navbar)
 import Footer from "../components/Footer";
-import { AuthProvider } from "../context/AuthContext"; // <--- 1. IMPORTACIÓN NUEVA
+import { AuthProvider } from "../context/AuthContext";
+// 1. IMPORTAMOS EL MODAL DE TEMAS
+import ThemeSelectionModal from "../components/ThemeSelectionModal"; 
 
 // Configuración de la fuente gruesa
 const oswald = Oswald({ 
@@ -30,12 +31,13 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${oswald.variable} ${inter.variable} font-sans bg-sk-black text-white antialiased`}>
         
-        {/* 2. ENVOLVEMOS TODO CON AUTHPROVIDER */}
+        {/* Envolvemos todo con el proveedor de autenticación y temas */}
         <AuthProvider>
           
           <Navbar />
-          
-          {/* <StreamBar />  <--- ELIMINADO AQUÍ para evitar duplicados */}
+
+          {/* 2. AGREGAMOS EL MODAL AQUÍ (Estará oculto por defecto) */}
+          <ThemeSelectionModal />
           
           <main className="min-h-screen pt-0"> 
             {children}

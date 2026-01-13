@@ -28,7 +28,7 @@ export async function GET() {
 
     try {
         const [rows]: any = await pool.query(
-            "SELECT nickname, email, avatar, role, bio, cpu, gpu, ram, mouse, monitor, createdAt, real_name, birthdate, gender, country, discord_id, discord_username, steam_id, steam_username FROM User WHERE id = ?",
+            "SELECT nickname, email, avatar, role, bio, cpu, gpu, ram, mouse, monitor, createdAt, real_name, birthdate, gender, country, discord_id, discord_username, steam_id, steam_username, theme FROM User WHERE id = ?",
             [userId]
         );
 
@@ -63,11 +63,12 @@ export async function PUT(request: Request) {
         real_name = ?,
         birthdate = ?,
         gender = ?,
-        country = ?
+        country = ?,
+        theme = ?
        WHERE id = ?`,
             [
                 data.bio, data.cpu, data.gpu, data.ram, data.mouse, data.monitor,
-                data.real_name, data.birthdate, data.gender, data.country,
+                data.real_name, data.birthdate, data.gender, data.country, data.theme,
                 userId
             ]
         );
