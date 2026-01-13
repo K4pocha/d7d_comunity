@@ -62,18 +62,18 @@ export async function POST(request: Request) {
 
 // 2. LEER NOTICIAS (Público)
 export async function GET() {
-  try {
-    // NUEVO: Traemos también la columna 'category'
+  try {    
     const [rows]: any = await pool.query(
-      `SELECT News.id, News.title, News.content, News.category, News.image, News.created_at, 
-              User.nickname as author_name, User.avatar as author_avatar 
-       FROM News 
-       LEFT JOIN User ON News.author_id = User.id 
-       ORDER BY created_at DESC`
+      `SELECT news.id, news.title, news.content, news.category, news.image, news.created_at, 
+              user.nickname as author_name, user.avatar as author_avatar 
+       FROM news 
+       LEFT JOIN user ON news.author_id = user.id 
+       ORDER BY createdAt DESC`
     );
 
     return NextResponse.json(rows);
   } catch (error) {
+    console.error("Error API News:", error); // Esto te ayudará a ver el error real en los logs de cPanel
     return NextResponse.json({ message: "Error al cargar noticias" }, { status: 500 });
   }
 }
