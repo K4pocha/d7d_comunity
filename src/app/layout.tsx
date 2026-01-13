@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import { Oswald, Inter } from "next/font/google"; 
 import "./globals.css";
 import Navbar from "../components/Navbar";
-import StreamBar from "../components/StreamBar"; 
+// import StreamBar from "../components/StreamBar"; <--- ELIMINADO (Ya está dentro de Navbar)
 import Footer from "../components/Footer";
-
+import { AuthProvider } from "../context/AuthContext"; // <--- 1. IMPORTACIÓN NUEVA
 
 // Configuración de la fuente gruesa
 const oswald = Oswald({ 
   subsets: ["latin"], 
   variable: "--font-oswald",
-  weight: ["400", "500", "700"], // Pesos normales y muy gruesos
+  weight: ["400", "500", "700"], 
 });
 
-// Fuente secundaria para textos largos (párrafos) para que se lea bien
+// Fuente secundaria
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
@@ -29,12 +29,22 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${oswald.variable} ${inter.variable} font-sans bg-sk-black text-white antialiased`}>
-        <Navbar />
-        <StreamBar /> {/* Aquí va la barra de stream dinámica */}
-        <main className="min-h-screen pt-0"> 
-          {children}
-        </main>
-        <Footer />
+        
+        {/* 2. ENVOLVEMOS TODO CON AUTHPROVIDER */}
+        <AuthProvider>
+          
+          <Navbar />
+          
+          {/* <StreamBar />  <--- ELIMINADO AQUÍ para evitar duplicados */}
+          
+          <main className="min-h-screen pt-0"> 
+            {children}
+          </main>
+          
+          <Footer />
+
+        </AuthProvider>
+        
       </body>
     </html>
   );

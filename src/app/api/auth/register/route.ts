@@ -1,31 +1,41 @@
 import { NextResponse } from "next/server";
+import { pool } from "../../../../lib/db"; // Importamos nuestra conexión nueva
+import bcrypt from "bcrypt";
 
 export async function POST(request: Request) {
-  // 1. Recibimos los datos (aunque no los guardemos)
-  const body = await request.json();
-  const { nickname, email, password } = body;
+  try {
+    const data = await request.json();
+    const { email, nickname, password } = data;
 
-  console.log("📝 Datos recibidos en modo UI:", { nickname, email, password });
+    if (!email || !nickname || !password) {
+      return NextResponse.json({ message: "Faltan datos" }, { status: 400 });
+    }
 
-  // 2. SIMULAMOS una espera de 2 segundos (para ver la animación de carga)
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+    // 1. Encriptar contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 3. (Opcional) Simular un error para probar tu alerta roja
-  // Si quieres ver cómo se ve el error, descomenta estas 3 líneas:
-  /*
-  if (nickname === "Error") {
-    return NextResponse.json({ message: "El usuario ya existe (Prueba de UI)" }, { status: 409 });
-  }
-  */
+    // 2. Insertar en la Base de Datos (SQL PURO)
+    // Los signos '?' son por seguridad (evitan hackeos SQL Injection)
+    const [result]: any = await pool.query(
+      "INSERT INTO User (email, nickname, password, avatar, role) VALUES (?, ?, ?, ?, ?)",
+      [email, nickname, hashedPassword, "/fondo.jpg", "USER"]
+    );
 
-  // 4. Devolver éxito (Esto arregla el error de JSON.parse)
-  return NextResponse.json(
-    { 
-      id: 1, 
-      nickname, 
+    // 3. Responder
+    return NextResponse.json({ 
+      id: result.insertId, 
       email, 
-      role: "USER" 
-    }, 
-    { status: 201 }
-  );
+      nickname 
+    }, { status: 201 });
+
+  } catch (error: any) {
+    console.error("Error SQL:", error);
+
+    // Si el error es código 'ER_DUP_ENTRY', es que el usuario ya existe
+    if (error.code === 'ER_DUP_ENTRY') {
+      return NextResponse.json({ message: "El usuario o correo ya existen" }, { status: 409 });
+    }
+
+    return NextResponse.json({ message: "Error del servidor" }, { status: 500 });
+  }
 }
