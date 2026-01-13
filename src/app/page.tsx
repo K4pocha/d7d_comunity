@@ -1,17 +1,44 @@
+"use client";
+
+import { useState, useEffect } from "react"; // <--- IMPORTANTE: Agregados hooks
 import PartnerRow from "@/src/components/PartnerRow";
 import Image from "next/image";
 import Link from "next/link";
 import socialLinks from "@/src/data/social-links.json"; 
-import newsData from "@/src/data/news.json"; 
-import { Users } from "lucide-react"; 
+// import newsData from "@/src/data/news.json"; <--- ELIMINADO
+import { Users, Calendar } from "lucide-react"; // Agregué Calendar para la fecha
 
 const DiscordIcon = () => (
   <svg className="w-6 h-6" viewBox="0 0 127.14 96.36" fill="currentColor"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" /></svg>
 );
 
 export default function Home() {
+  const [latestNews, setLatestNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // LOGICA PARA CARGAR NOTICIAS DE LA BD
+  useEffect(() => {
+    fetch("/api/news")
+      .then((res) => res.json())
+      .then((data) => {
+        // Tomamos solo las 3 primeras y formateamos los datos
+        const recent = data.slice(0, 3).map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            image: item.image || "/news-placeholder.jpg",
+            category: item.category || "General",
+            date: new Date(item.created_at).toLocaleDateString("es-ES", { day: 'numeric', month: 'short', year: 'numeric' }),
+            // Creamos un extracto cortando el contenido
+            excerpt: item.content.substring(0, 100) + "..."
+        }));
+        setLatestNews(recent);
+        setLoading(false);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#050505]">
 
       {/* HERO SECTION */}
       <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-black">
@@ -32,7 +59,6 @@ export default function Home() {
           </span>
           
           <div className="mb-12 relative flex justify-center">
-            {/* LOGO UN POCO MAS PEQUEÑO (max-w reducido) */}
             <Image
               src="/LogoDisplaced.png"
               alt="Disp7aceD Logo"
@@ -70,8 +96,8 @@ export default function Home() {
       {/* PARTNERS ROW (CARRUSEL) */}
       <PartnerRow />
 
-      {/* NOTICIAS */}
-      <section className="max-w-7xl mx-auto px-4 py-24">
+      {/* NOTICIAS DINÁMICAS */}
+      <section className="max-w-7xl mx-auto px-4 py-24 w-full">
         <div className="flex justify-between items-end mb-12 border-b border-white/10 pb-4">
           <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-white">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Últimas</span>{" "}
@@ -81,45 +107,62 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {newsData.map((news) => (
-            <article key={news.id} className="bg-[#111] border border-white/5 hover:border-sk-accent transition-all group cursor-pointer flex flex-col h-full hover:-translate-y-2 duration-300">
-              <div className="h-64 bg-gray-900 relative overflow-hidden">
-                <Image 
-                  src={news.image} 
-                  alt={news.title} 
-                  fill 
-                  className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
-                />
-                <div className="absolute top-0 left-0 bg-sk-accent text-white text-xs font-black px-3 py-1 uppercase skew-x-[-12deg] -ml-2 shadow-lg">
-                   <span className="block skew-x-[12deg]">{news.category}</span>
-                </div>
-              </div>
-              <div className="p-8 flex flex-col flex-grow relative">
-                <div className="mb-3 text-xs text-sk-accent font-mono uppercase tracking-wider">{news.date}</div>
-                <h3 className="text-xl font-bold mb-4 leading-tight text-white group-hover:text-sk-accent transition-colors">
-                  {news.title}
-                </h3>
-                <p className="text-gray-200 text-sm line-clamp-3 leading-relaxed"> {/* CAMBIO: Texto más blanco */}
-                  {news.excerpt}
-                </p>
-              </div>
-            </article>
-          ))}
+          
+          {loading ? (
+             <div className="col-span-3 text-center py-10 text-gray-500 animate-pulse uppercase tracking-widest font-bold text-xs">
+                Cargando noticias desde la base de datos...
+             </div>
+          ) : (
+             latestNews.map((news) => (
+                <Link key={news.id} href={`/noticias/${news.id}`}>
+                    <article className="bg-[#111] border border-white/5 hover:border-sk-accent transition-all group cursor-pointer flex flex-col h-full hover:-translate-y-2 duration-300 rounded-xl overflow-hidden">
+                    <div className="h-64 bg-gray-900 relative overflow-hidden">
+                        <Image 
+                        src={news.image} 
+                        alt={news.title} 
+                        fill 
+                        className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
+                        />
+                        <div className="absolute top-0 left-0 bg-sk-accent text-white text-xs font-black px-3 py-1 uppercase skew-x-[-12deg] -ml-2 shadow-lg">
+                            <span className="block skew-x-[12deg]">{news.category}</span>
+                        </div>
+                    </div>
+                    <div className="p-8 flex flex-col flex-grow relative">
+                        <div className="mb-3 text-xs text-sk-accent font-mono uppercase tracking-wider flex items-center gap-2">
+                             <Calendar size={12}/> {news.date}
+                        </div>
+                        <h3 className="text-xl font-bold mb-4 leading-tight text-white group-hover:text-sk-accent transition-colors line-clamp-2">
+                        {news.title}
+                        </h3>
+                        <p className="text-gray-200 text-sm line-clamp-3 leading-relaxed">
+                        {news.excerpt}
+                        </p>
+                    </div>
+                    </article>
+                </Link>
+             ))
+          )}
+
         </div>
       </section>
 
-      {/*  SPONSORS ANTES DEL FOOTER  */}
+      {/* SPONSORS ANTES DEL FOOTER */}
       <section className="w-full bg-[#080808] border-t border-white/5 py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-gray-500 text-xs tracking-[0.4em] uppercase mb-10 font-bold">Nuestros Partners Oficiales</p>
           
           <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
              {/* AQUI VAN LOGOS DE SPONSORS  */}
-             <div className="relative h-12 w-32 hover:opacity-100 transition-opacity"><Image src="/partners/.png" alt="Sponsor1" fill className="object-contain"/></div>
-             <div className="relative h-16 w-32 hover:opacity-100 transition-opacity"><Image src="/partners/.png" alt="Sponsor2" fill className="object-contain"/></div>
-             <div className="relative h-10 w-32 hover:opacity-100 transition-opacity"><Image src="/partners/.png" alt="Sponsor3 " fill className="object-contain"/></div>
-             {/*  placeholder divs */}
-             <div className="h-10 w-32 bg-white/10 rounded"></div> 
+             <div className="relative h-12 w-32 hover:opacity-100 transition-opacity cursor-pointer">
+                 {/* <Image src="/partners/logitech.png" alt="Sponsor1" fill className="object-contain"/>  <-- Descomenta cuando tengas logos */}
+                 <div className="w-full h-full bg-white/10 rounded animate-pulse"></div>
+             </div>
+             <div className="relative h-16 w-32 hover:opacity-100 transition-opacity cursor-pointer">
+                 <div className="w-full h-full bg-white/10 rounded animate-pulse"></div>
+             </div>
+             <div className="relative h-10 w-32 hover:opacity-100 transition-opacity cursor-pointer">
+                 <div className="w-full h-full bg-white/10 rounded animate-pulse"></div>
+             </div>
           </div>
         </div>
       </section>

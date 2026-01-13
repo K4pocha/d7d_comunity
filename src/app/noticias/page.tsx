@@ -1,31 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, ArrowRight, Filter } from "lucide-react";
-
-// 1. IMPORTAMOS LOS DATOS DEL JSON
-import newsData from "../../data/news.json";
+import { Calendar, ArrowRight, Filter, Layout } from "lucide-react";
 
 export default function NewsPage() {
+  const [news, setNews] = useState<any[]>([]); 
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("Todas");
 
-  // 2. MAGIA: Extraemos las categorías únicas automáticamente del JSON
-  // Esto crea una lista tipo ["Todas", "Lanzamiento", "Comunidad", "Reclutamiento"]
-  const categories = ["Todas", ...new Set(newsData.map((item) => item.category))];
+  // 1. CARGAR DATOS REALES DESDE LA API
+  useEffect(() => {
+    fetch("/api/news")
+      .then((res) => res.json())
+      .then((data) => {
+        // Adaptamos los datos de la BD para que encajen en el diseño
+        const formattedNews = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          image: item.image || "/news-placeholder.jpg",
+          category: item.category || "General", // Aquí ya lee la categoría real
+          date: new Date(item.created_at).toLocaleDateString("es-ES", { day: 'numeric', month: 'short', year: 'numeric' }),
+          excerpt: item.content.substring(0, 150) + "...",
+          slug: item.id 
+        }));
+        
+        setNews(formattedNews);
+        setLoading(false);
+      })
+      .catch((err) => console.error("Error cargando noticias:", err));
+  }, []);
 
-  // 3. Lógica de Filtrado
+  // 2. EXTRAER CATEGORÍAS ÚNICAS
+  const categories = ["Todas", ...new Set(news.map((item) => item.category))];
+
+  // 3. FILTRADO
   const filteredNews = filter === "Todas" 
-    ? newsData 
-    : newsData.filter(n => n.category === filter);
+    ? news 
+    : news.filter(n => n.category === filter);
 
-  // Separamos la noticia principal (Hero) del resto (Grid)
+  // Separamos Hero y Grid
   const heroNews = filteredNews[0];
   const gridNews = filteredNews.slice(1);
 
+  if (loading) return (
+    <div className="min-h-screen bg-[#050505] pt-40 flex flex-col items-center justify-center text-white gap-4">
+        <Layout className="animate-bounce text-sk-accent" size={48} />
+        <p className="uppercase tracking-widest text-sm font-bold">Cargando Novedades...</p>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-[#050505] pt-24 pb-12 px-4">
+    <div className="min-h-screen bg-[#050505] pt-36 pb-12 px-4">
       <div className="max-w-7xl mx-auto">
         
         {/* HEADER & FILTROS */}
@@ -37,11 +64,10 @@ export default function NewsPage() {
             <p className="text-gray-400 text-sm uppercase tracking-widest">Actualidad del ecosistema D7D</p>
           </div>
 
-          {/* Botones de Categorías (Dinámicos) */}
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
-                key={cat}
+                key={cat as string}
                 onClick={() => setFilter(cat as string)}
                 className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
                   filter === cat
@@ -55,17 +81,17 @@ export default function NewsPage() {
           </div>
         </div>
 
-        {/* ESTADO VACÍO (Por si filtras y no hay nada) */}
+        {/* ESTADO VACÍO */}
         {filteredNews.length === 0 && (
           <div className="text-center py-20 text-gray-500">
             <Filter size={48} className="mx-auto mb-4 opacity-20" />
-            <p>No hay noticias en esta categoría.</p>
+            <p>No hay noticias disponibles aún.</p>
           </div>
         )}
 
-        {/* --- NOTICIA DESTACADA (HERO) --- */}
+        {/* NOTICIA DESTACADA (HERO) */}
         {heroNews && (
-          <Link href={`/noticias/${heroNews.slug}`} className="group relative block w-full h-[500px] rounded-2xl overflow-hidden mb-12 border border-white/10">
+          <Link href={`/noticias/${heroNews.id}`} className="group relative block w-full h-[500px] rounded-2xl overflow-hidden mb-12 border border-white/10">
             <Image 
               src={heroNews.image} 
               alt={heroNews.title} 
@@ -97,12 +123,10 @@ export default function NewsPage() {
           </Link>
         )}
 
-        {/* --- RESTO DE NOTICIAS (GRID) --- */}
+        {/* GRID DE NOTICIAS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {gridNews.map((news) => (
-            <Link key={news.id} href={`/noticias/${news.slug}`} className="group bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden hover:border-sk-accent/50 transition-all hover:-translate-y-1">
-              
-              {/* Imagen */}
+            <Link key={news.id} href={`/noticias/${news.id}`} className="group bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden hover:border-sk-accent/50 transition-all hover:-translate-y-1">
               <div className="relative h-48 w-full overflow-hidden">
                 <Image 
                   src={news.image} 
@@ -111,13 +135,11 @@ export default function NewsPage() {
                   className="object-cover transition-transform duration-500 group-hover:scale-110" 
                 />
                 <div className="absolute top-4 left-4">
-                   <span className="px-2 py-1 bg-black/80 backdrop-blur text-white text-[10px] font-bold uppercase rounded border border-white/10">
-                     {news.category}
-                   </span>
+                    <span className="px-2 py-1 bg-black/80 backdrop-blur text-white text-[10px] font-bold uppercase rounded border border-white/10">
+                      {news.category}
+                    </span>
                 </div>
               </div>
-
-              {/* Contenido */}
               <div className="p-6">
                 <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase mb-3">
                   <Calendar size={12} /> {news.date}
@@ -135,7 +157,6 @@ export default function NewsPage() {
             </Link>
           ))}
         </div>
-
       </div>
     </div>
   );
