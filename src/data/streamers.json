@@ -40,5 +40,27 @@
       "twitch": "https://twitch.tv/shroud",
       "twitter": "https://twitter.com/shroud"
     }
+  }, 
+  {
+    "id": "iscalixto",
+    "name": "Calixto",
+    "bio": "Streamer y competidor apasionado por los videojuegos y el equilibrio con la vida exterior. Realiza streaming junto a amigos, enfocándose en el disfrute del día a día y en contenidos de juegos de supervivencia y shooters. \n Compite desde 2007 en Counter-Strike 1.6, participando en torneos, ligas y organizaciones. Combina el juego casual con el entorno competitivo, manteniendo un estilo directo y auténtico, orientado al crecimiento personal y la superación constante. \n Ha trabajado activamente en el desarrollo de los e-Sports a nivel regional, organizando eventos y colaborando con plataformas y empresas del rubro, con el objetivo de impulsar una escena más sana, profesional y con proyección.",
+    "image": "/streamers/.jpg",
+    "socials": {
+      "twitch": "https://www.twitch.tv/iscalixto",
+      "twitter": "https://twitter.com/"
+    }
+  },
+  {
+    "id": "belek420",
+    "name": "Belek",
+    "bio": "Jugador de Valorant, Overwatch, CS2 y Marvel Rivals, con interés activo en múltiples áreas creativas como la producción musical, la producción audiovisual y la fotografía. Cuenta con formación en fotografía con expresión creativa, experiencia en la administración de servidores de Minecraft y se encuentra en proceso de aprendizaje de teoría musical orientada al DJ",
+    "image": "/streamers/.jpg",
+    "socials": {
+      "spotify": "https://open.spotify.com/intl-es/artist/6TzQ2NIfWyLXwidSfqLz8t?si=v0pzSbygQJuRHZ9_5dxl7g",
+      "youtube": "https://www.instagram.com/xx.belek.xx/",
+      "instagram":"https://www.instagram.com/xx.belek.xx/ "
+    }
   }
+  
 ]

@@ -54,7 +54,7 @@ function StreamersContent() {
         ))}
       </div>
 
-      {/* MODAL (Igual que antes, usando selectedStreamer) */}
+      {/* MODAL */}
       {selectedStreamer && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="bg-[#111] border border-white/10 w-full max-w-2xl rounded-2xl overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col md:flex-row">
@@ -74,7 +74,10 @@ function StreamersContent() {
               <h2 className="text-4xl font-black uppercase italic text-sk-accent mb-2">
                 {selectedStreamer.name}
               </h2>
-              <p className="text-gray-300 mb-6 leading-relaxed">
+              
+              {/* --- AQUÍ ESTÁ EL CAMBIO --- */}
+              {/* Se agregó 'whitespace-pre-line' para que respete los \n */}
+              <p className="text-gray-300 mb-6 leading-relaxed whitespace-pre-line text-justify">
                 {selectedStreamer.bio}
               </p>
 

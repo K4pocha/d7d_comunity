@@ -7,7 +7,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { 
   Shield, Users, FileText, Search, LayoutDashboard, 
-  Edit3, Trophy, CheckCircle2, AlertCircle 
+  Edit3, Trophy, CheckCircle2, AlertCircle, 
+  Swords // <--- NUEVO ICONO
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -93,6 +94,7 @@ export default function AdminDashboard() {
 
         {/* --- 1. ACCESOS RÁPIDOS --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            
             {/* Tarjeta Noticias */}
             <Link href="/admin/crear-noticia" className="group bg-[#0a0a0a] border border-white/10 p-6 rounded-xl hover:border-sk-accent/50 transition-all hover:-translate-y-1">
                 <div className="flex justify-between items-start mb-4">
@@ -101,6 +103,16 @@ export default function AdminDashboard() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1 group-hover:text-sk-accent">Publicar Noticia</h3>
                 <p className="text-sm text-gray-500">Crear nuevos artículos para el blog.</p>
+            </Link>
+
+            {/* --- NUEVA TARJETA: GESTIONAR EQUIPOS --- */}
+            <Link href="/admin/equipos" className="group bg-[#0a0a0a] border border-white/10 p-6 rounded-xl hover:border-sk-accent/50 transition-all hover:-translate-y-1">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="p-3 bg-orange-500/10 rounded-lg text-orange-400"><Swords size={24}/></div>
+                    <ArrowIcon />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-1 group-hover:text-sk-accent">Gestionar Equipos</h3>
+                <p className="text-sm text-gray-500">Editar rosters, estados y juegos.</p>
             </Link>
 
             {/* Tarjeta Torneos (Futuro) */}

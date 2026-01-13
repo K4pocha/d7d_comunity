@@ -3,12 +3,11 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, User, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, Settings, LayoutDashboard, Edit3, Swords } from "lucide-react";
 import StreamBar from "./StreamBar";
 import MegaMenu from "./MegaMenu";
 import ThemeToggle from "../components/ThemeToggle";
 import { useAuth } from "../context/AuthContext";
-import { Edit3 } from "lucide-react";
 
 
 const DiscordIcon = () => (
@@ -119,14 +118,21 @@ export default function Navbar() {
                           <div className="px-4 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                             Administración
                           </div>
-                          {/* Enlace existente al Panel General (si lo tienes) */}
+                          
                           <Link href="/admin" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
                             <LayoutDashboard size={16} /> Panel General
                           </Link>
-                          {/* NUEVO: Enlace directo a Crear Noticia */}
-                          <Link href="/admin/crear-noticia" className="flex items-center gap-2 px-4 py-2 text-sm text-sk-accent hover:bg-sk-accent/10 transition-colors">
+
+                          {/* Enlace directo a Crear Noticia */}
+                          <Link href="/admin/crear-noticia" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
                             <Edit3 size={16} /> Publicar Noticia
                           </Link>
+
+                          {/* --- NUEVO: ENLACE A GESTIONAR EQUIPOS --- */}
+                          <Link href="/admin/equipos" className="flex items-center gap-2 px-4 py-2 text-sm text-sk-accent hover:bg-sk-accent/10 transition-colors">
+                            <Swords size={16} /> Editar Equipos
+                          </Link>
+
                           <div className="my-1 border-t border-white/5"></div>
                         </>
                       )}
@@ -146,7 +152,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              // SI NO HAY USUARIO: Mostrar Botón Login (El que tenías antes)
+              // SI NO HAY USUARIO: Mostrar Botón Login
               <Link
                 href="/login"
                 className="border border-white/20 hover:border-sk-accent text-white hover:text-sk-accent px-4 py-1.5 rounded text-xs font-bold uppercase transition-all duration-300 flex items-center gap-2"
@@ -166,7 +172,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Menú Móvil (Sin cambios mayores, solo podrías agregar condicional de usuario ahí también si quieres) */}
+      {/* Menú Móvil */}
     </header>
   );
 }
