@@ -287,7 +287,7 @@ export default function EquiposPage() {
                 <div className={`absolute inset-0 z-20 bg-[#111] flex flex-col transition-all duration-500 p-4 ${isRosterOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}>
                    
                    <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
-                      <h4 className="text-xl font-black uppercase italic text-white">Active <span className="text-sk-accent">Roster</span></h4>
+                      <h4 className="text-xl font-black uppercase italic text-white">Integrantes <span className="text-sk-accent">Actuales</span></h4>
                       <button onClick={() => toggleRoster(team.id)} className="text-gray-400 hover:text-white transition-colors">
                          <X size={24} />
                       </button>

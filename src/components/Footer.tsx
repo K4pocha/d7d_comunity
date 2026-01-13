@@ -1,9 +1,11 @@
 "use client";
 
-import { Twitter, Instagram, Youtube, Twitch, Facebook } from "lucide-react";
-import socialLinks from "../data/social-links.json";
+import { Twitter, Instagram, Youtube, Twitch } from "lucide-react";
+import socialLinks from "../data/social-links.json"; // Asegúrate de agregar "tiktok": "url..." aquí
 import { useEffect } from "react";
+import { FaTiktok } from "react-icons/fa";
 
+// Componente Discord Icon (SVG personalizado)
 const DiscordIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 127.14 96.36" fill="currentColor">
     <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
@@ -13,12 +15,10 @@ const DiscordIcon = ({ size = 20 }: { size?: number }) => (
 export default function Footer() {
   const socialNetworks = [
     { icon: DiscordIcon, href: socialLinks.discord, label: "Discord" },
-    { icon: Twitter, href: socialLinks.twitter, label: "Twitter" },
-    { icon: Instagram, href: socialLinks.instagram, label: "Instagram" },
-    { icon: Twitch, href: socialLinks.twitch, label: "Twitch" },
-    { icon: Youtube, href: socialLinks.youtube, label: "Youtube" },
+    { icon: FaTiktok, href: socialLinks.tiktok, label: "TikTok" },
   ];
 
+  // Filtramos solo las que tengan link definido
   const activeNetworks = socialNetworks.filter(social => social.href && social.href !== "");
 
   // EFECTO HACKER: Mensaje en la consola
@@ -42,7 +42,9 @@ export default function Footer() {
           <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-800 opacity-90 py-4 px-1 leading-normal">
             SIGUENOS
           </h2>
-          <p className="text-gray-500 mt-0 uppercase tracking-widest text-sm px-3">Se parte de #DIsp7aceDNetwork</p>
+          <p className="text-gray-500 mt-0 uppercase tracking-widest text-sm px-3">
+            Se parte de #Disp7aceDNetwork
+          </p>
         </div>
 
         {/* ICONOS */}
