@@ -90,7 +90,7 @@ export async function POST(request: Request) {
   }
 }
 
-// 3. PUT: Editar Jugador (Con Foto)
+// 3. PUT: Editar Jugador 
 export async function PUT(request: Request) {
     if (!(await isAdmin())) return NextResponse.json({ message: "No autorizado" }, { status: 403 });
   
@@ -98,38 +98,45 @@ export async function PUT(request: Request) {
       const formData = await request.formData();
       const id = formData.get("id");
 
-      // Procesar Imagen Nueva (Si hay)
-      const file = formData.get("photo_file") as File | null;
-      let photoUrl = formData.get("existing_photo_url") as string; // Mantener la anterior por defecto
+      if (!id) return NextResponse.json({ error: "Falta ID" }, { status: 400 });
 
-      if (file && file.size > 0) {
+      // 1. Manejo de la Imagen
+      const file = formData.get("photo_file") as File | null;
+      let photoUrl = formData.get("existing_photo_url") as string; // Por defecto mantenemos la vieja
+
+      // Solo si suben un archivo NUEVO y VÁLIDO, lo procesamos
+      if (file && file instanceof File && file.size > 0) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '');
         const fileName = `${Date.now()}-${safeName}`;
         const uploadDir = path.join(process.cwd(), "public/uploads");
         const filePath = path.join(uploadDir, fileName);
+        
         await writeFile(filePath, buffer);
         photoUrl = `/uploads/${fileName}`;
       }
 
-      // Datos
-      const nickname = formData.get("nickname");
-      const role = formData.get("role");
-      const country = formData.get("country");
-      const bio = formData.get("bio");
+      // 2. Extracción de datos (Con valores por defecto para evitar NULLs)
+      const nickname = formData.get("nickname") || "";
+      const role = formData.get("role") || "";
+      const country = formData.get("country") || "CL";
+      const bio = formData.get("bio") || "";
 
+      // 3. Construcción de JSONs (Asegurando que sean strings válidos)
       const socials = JSON.stringify({
-        twitter: formData.get("twitter"),
-        twitch: formData.get("twitch"),
-        instagram: formData.get("instagram")
+        twitter: formData.get("twitter") || "",
+        twitch: formData.get("twitch") || "",
+        instagram: formData.get("instagram") || ""
       });
+      
       const setup = JSON.stringify({
-        mouse: formData.get("mouse"),
-        keyboard: formData.get("keyboard"),
-        monitor: formData.get("monitor")
+        mouse: formData.get("mouse") || "",
+        keyboard: formData.get("keyboard") || "",
+        monitor: formData.get("monitor") || ""
       });
   
+      // 4. Update en Base de Datos
       await pool.query(
         'UPDATE roster SET nickname=?, role=?, country=?, bio=?, photo_url=?, socials=?, setup=? WHERE id=?',
         [nickname, role, country, bio, photoUrl, socials, setup, id]
@@ -137,7 +144,7 @@ export async function PUT(request: Request) {
   
       return NextResponse.json({ success: true });
     } catch (error: any) {
-      console.error(error);
+      console.error("Error PUT Roster:", error); // Ver el error en consola de cPanel
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
