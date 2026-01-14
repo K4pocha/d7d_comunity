@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { pool } from '../../../lib/db';
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+
 
 // SEGURIDAD
 async function isAdmin() {
@@ -101,29 +102,36 @@ export async function PUT(request: Request) {
       if (!id) return NextResponse.json({ error: "Falta ID" }, { status: 400 });
 
       // 1. Manejo de la Imagen
-      const file = formData.get("photo_file") as File | null;
-      let photoUrl = formData.get("existing_photo_url") as string; // Por defecto mantenemos la vieja
+      const file = formData.get("photo_file") as any; // Usamos 'any' temporalmente para evitar problemas de tipado estricto
+      let photoUrl = formData.get("existing_photo_url") as string; 
 
-      // Solo si suben un archivo NUEVO y VÁLIDO, lo procesamos
-      if (file && file instanceof File && file.size > 0) {
+      // Verificación más robusta: revisamos si tiene nombre y tamaño
+      if (file && file.name && file.size > 0) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '');
-        const fileName = `${Date.now()}-${safeName}`;
-        const uploadDir = path.join(process.cwd(), "public/uploads");
-        const filePath = path.join(uploadDir, fileName);
         
+        // Limpiamos el nombre
+        const safeName = file.name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9.-]/g, '');
+        const fileName = `${Date.now()}-${safeName}`;
+        
+        const uploadDir = path.join(process.cwd(), "public/uploads");
+        
+        // --- FIX CRÍTICO: Aseguramos que la carpeta exista antes de escribir ---
+        await mkdir(uploadDir, { recursive: true });
+
+        const filePath = path.join(uploadDir, fileName);
         await writeFile(filePath, buffer);
+        
         photoUrl = `/uploads/${fileName}`;
       }
 
-      // 2. Extracción de datos (Con valores por defecto para evitar NULLs)
+      // 2. Extracción de datos
       const nickname = formData.get("nickname") || "";
       const role = formData.get("role") || "";
       const country = formData.get("country") || "CL";
       const bio = formData.get("bio") || "";
 
-      // 3. Construcción de JSONs (Asegurando que sean strings válidos)
+      // 3. JSONs
       const socials = JSON.stringify({
         twitter: formData.get("twitter") || "",
         twitch: formData.get("twitch") || "",
@@ -136,7 +144,7 @@ export async function PUT(request: Request) {
         monitor: formData.get("monitor") || ""
       });
   
-      // 4. Update en Base de Datos
+      // 4. Update
       await pool.query(
         'UPDATE roster SET nickname=?, role=?, country=?, bio=?, photo_url=?, socials=?, setup=? WHERE id=?',
         [nickname, role, country, bio, photoUrl, socials, setup, id]
@@ -144,7 +152,7 @@ export async function PUT(request: Request) {
   
       return NextResponse.json({ success: true });
     } catch (error: any) {
-      console.error("Error PUT Roster:", error); // Ver el error en consola de cPanel
+      console.error("Error PUT Roster Completo:", error); // Esto saldrá en los logs de cPanel (stderr.log)
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
