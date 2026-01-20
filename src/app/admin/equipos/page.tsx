@@ -1,24 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Edit, Save, X, Trash2, Plus, User, MousePointer2, Monitor, Keyboard, RefreshCw, Upload } from "lucide-react";
+import { Edit, Save, X, Trash2, Plus, User, MousePointer2, Headphones, Keyboard, RefreshCw, Upload } from "lucide-react";
 
 export default function AdminEquipos() {
   const [teams, setTeams] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [teamForm, setTeamForm] = useState<any>({});
-  
   const [rosterList, setRosterList] = useState<any[]>([]);
   
-  // FORMULARIO DE JUGADOR
+  // FORMULARIO DE JUGADOR (Con nuevos campos)
   const [playerForm, setPlayerForm] = useState({
     id: null, nickname: "", role: "", country: "CL", bio: "", 
-    photo_url: "", // URL existente
-    twitter: "", twitch: "", instagram: "",
-    mouse: "", keyboard: "", monitor: ""
+    photo_url: "",
+    twitter: "", twitch: "", instagram: "", tiktok: "", kick: "", youtube: "", // Redes nuevas
+    mouse: "", keyboard: "", headphones: "" // Cambio Monitor -> Headphones
   });
   
-  // NUEVO: Estado para el archivo de imagen
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
   useEffect(() => { fetchTeams(); }, []);
@@ -42,7 +40,6 @@ export default function AdminEquipos() {
     resetPlayerForm();
   };
 
-  // Guardar Equipo (JSON simple)
   const handleSaveTeam = async () => {
     try {
       const res = await fetch('/api/teams', {
@@ -53,30 +50,26 @@ export default function AdminEquipos() {
       if (res.ok) {
         setEditingId(null);
         fetchTeams();
-        alert("Equipo actualizado correctamente");
+        alert("Equipo actualizado");
       }
     } catch (error) { console.error(error); }
   };
-
-  // --- LÓGICA DE JUGADORES ---
 
   const handlePlayerChange = (e: any) => {
     setPlayerForm({ ...playerForm, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-        setPhotoFile(e.target.files[0]);
-    }
+    if (e.target.files && e.target.files[0]) setPhotoFile(e.target.files[0]);
   };
 
   const resetPlayerForm = () => {
     setPlayerForm({
         id: null, nickname: "", role: "", country: "CL", bio: "", photo_url: "",
-        twitter: "", twitch: "", instagram: "",
-        mouse: "", keyboard: "", monitor: ""
+        twitter: "", twitch: "", instagram: "", tiktok: "", kick: "", youtube: "",
+        mouse: "", keyboard: "", headphones: ""
     });
-    setPhotoFile(null); // Limpiar archivo
+    setPhotoFile(null);
   };
 
   const loadPlayerForEdit = (player: any) => {
@@ -87,18 +80,17 @@ export default function AdminEquipos() {
         id: player.id, nickname: player.nickname, role: player.role, country: player.country,
         bio: player.bio || "", photo_url: player.photo_url || "",
         twitter: socials.twitter || "", twitch: socials.twitch || "", instagram: socials.instagram || "",
-        mouse: setup.mouse || "", keyboard: setup.keyboard || "", monitor: setup.monitor || ""
+        tiktok: socials.tiktok || "", kick: socials.kick || "", youtube: socials.youtube || "",
+        mouse: setup.mouse || "", keyboard: setup.keyboard || "", 
+        headphones: setup.headphones || setup.monitor || "" // Retro-compatibilidad con monitor
     });
-    setPhotoFile(null); // Reiniciamos el archivo al editar otro
+    setPhotoFile(null);
   };
 
-  // GUARDAR JUGADOR CON FORM DATA (Para subir archivo)
   const handleSavePlayer = async () => {
     if (!playerForm.nickname || !playerForm.role) return alert("Falta Nickname o Rol");
 
     const method = playerForm.id ? 'PUT' : 'POST';
-    
-    // Usamos FormData para enviar archivo + texto
     const formData = new FormData();
     if (playerForm.id) formData.append("id", String(playerForm.id));
     formData.append("game_id", String(editingId));
@@ -110,32 +102,23 @@ export default function AdminEquipos() {
     // Periféricos
     formData.append("mouse", playerForm.mouse);
     formData.append("keyboard", playerForm.keyboard);
-    formData.append("monitor", playerForm.monitor);
+    formData.append("headphones", playerForm.headphones); // Nuevo
 
     // Redes
     formData.append("twitter", playerForm.twitter);
     formData.append("twitch", playerForm.twitch);
     formData.append("instagram", playerForm.instagram);
+    formData.append("tiktok", playerForm.tiktok);
+    formData.append("kick", playerForm.kick);
+    formData.append("youtube", playerForm.youtube);
 
-    // IMAGEN
-    if (photoFile) {
-        formData.append("photo_file", photoFile); // Nuevo archivo
-    }
-    // Enviamos también la URL antigua por si no suben archivo nuevo
+    if (photoFile) formData.append("photo_file", photoFile);
     formData.append("existing_photo_url", playerForm.photo_url);
 
     try {
-      const res = await fetch('/api/roster', {
-        method: method,
-        body: formData, // <--- Enviamos FormData, no JSON
-      });
-
-      if (res.ok) {
-        fetchRoster(editingId!);
-        resetPlayerForm();
-      } else {
-        alert("Error al guardar jugador");
-      }
+      const res = await fetch('/api/roster', { method: method, body: formData });
+      if (res.ok) { fetchRoster(editingId!); resetPlayerForm(); }
+      else { alert("Error al guardar jugador"); }
     } catch (error) { alert("Error de conexión"); }
   };
 
@@ -152,19 +135,16 @@ export default function AdminEquipos() {
   const handleTeamChange = (e: any) => { setTeamForm({ ...teamForm, [e.target.name]: e.target.value }); };
 
   return (
-    // CAMBIO 1: Aumenté a pt-52 para que baje más
     <div className="min-h-screen bg-black text-white p-4 md:p-10 pt-52">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-sk-accent uppercase">Panel de Administración: Equipos</h1>
-
         <div className="grid gap-6">
           {teams.map((team) => (
             <div key={team.id} className="bg-[#111] border border-white/10 p-6 rounded-lg flex flex-col gap-6">
-              
               {editingId === team.id ? (
                 <div className="space-y-8 animate-fade-in">
                   
-                  {/* EDITAR EQUIPO */}
+                  {/* EDITAR INFO EQUIPO */}
                   <div className="border-b border-white/10 pb-6">
                       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Edit size={20}/> Editar Información</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -193,23 +173,16 @@ export default function AdminEquipos() {
                       <div className="space-y-2 mb-6">
                         {rosterList.length > 0 ? (
                            rosterList.map(player => (
-                             <div key={player.id} className="flex items-center justify-between bg-white/5 p-3 rounded border border-white/10 hover:border-sk-accent/50 transition-colors">
+                             <div key={player.id} className="flex items-center justify-between bg-white/5 p-3 rounded border border-white/10">
                                 <div className="flex items-center gap-3">
-                                   {/* Mini preview de foto si existe */}
                                    <div className="w-8 h-8 bg-black rounded-full overflow-hidden border border-sk-accent">
                                       {player.photo_url ? <img src={player.photo_url} alt="" className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center text-xs font-bold">{player.country}</div>}
                                    </div>
-                                   <div>
-                                      <p className="font-bold text-white text-sm">{player.nickname} <span className="text-gray-500 font-normal">({player.role})</span></p>
-                                   </div>
+                                   <p className="font-bold text-white text-sm">{player.nickname} <span className="text-gray-500 font-normal">({player.role})</span></p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button onClick={() => loadPlayerForEdit(player)} className="text-blue-400 hover:bg-white/10 p-2 rounded" title="Editar Jugador">
-                                        <Edit size={18} />
-                                    </button>
-                                    <button onClick={() => handleDeletePlayer(player.id)} className="text-red-500 hover:bg-white/10 p-2 rounded" title="Eliminar">
-                                        <Trash2 size={18} />
-                                    </button>
+                                    <button onClick={() => loadPlayerForEdit(player)} className="text-blue-400 hover:bg-white/10 p-2 rounded"><Edit size={18} /></button>
+                                    <button onClick={() => handleDeletePlayer(player.id)} className="text-red-500 hover:bg-white/10 p-2 rounded"><Trash2 size={18} /></button>
                                 </div>
                              </div>
                            ))
@@ -223,35 +196,33 @@ export default function AdminEquipos() {
                          </h4>
                          
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            {/* Básicos */}
                             <input name="nickname" placeholder="Nickname" value={playerForm.nickname} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-sm text-white" />
                             <input name="role" placeholder="Rol" value={playerForm.role} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-sm text-white" />
                             <input name="country" placeholder="País (CL)" value={playerForm.country} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-sm text-white" />
                             
-                            {/* CAMBIO 2: Input File para Foto */}
-                            <div className="md:col-span-3">
-                                <label className="block text-xs text-gray-500 mb-1 uppercase">Foto del Jugador</label>
-                                <div className="flex gap-2 items-center">
-                                    <label className="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/20 px-3 py-2 rounded border border-white/20 transition-colors">
-                                        <Upload size={16} />
-                                        <span className="text-sm">Subir Archivo</span>
-                                        <input type="file" onChange={handleFileChange} accept="image/*" className="hidden" />
-                                    </label>
-                                    <span className="text-xs text-gray-400 italic">
-                                        {photoFile ? photoFile.name : (playerForm.photo_url ? "Imagen actual guardada" : "Sin archivo seleccionado")}
-                                    </span>
-                                </div>
+                            {/* Input File Foto */}
+                            <div className="md:col-span-3 flex gap-2 items-center">
+                                <label className="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/20 px-3 py-2 rounded border border-white/20 transition-colors">
+                                    <Upload size={16} /> <span className="text-sm">Subir Foto</span>
+                                    <input type="file" onChange={handleFileChange} accept="image/*" className="hidden" />
+                                </label>
+                                <span className="text-xs text-gray-400 italic">{photoFile ? photoFile.name : (playerForm.photo_url ? "Foto guardada" : "Sin foto")}</span>
                             </div>
                             
                             <input name="bio" placeholder="Biografía..." value={playerForm.bio} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-sm text-white md:col-span-3" />
 
-                            {/* Redes */}
-                            <input name="twitter" placeholder="Link Twitter" value={playerForm.twitter} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-sm text-white" />
-                            <input name="twitch" placeholder="Link Twitch" value={playerForm.twitch} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-sm text-white" />
-                            <input name="instagram" placeholder="Link Instagram" value={playerForm.instagram} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-sm text-white" />
+                            {/* Redes (Expandido) */}
+                            <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-2 border-t border-white/10 pt-3 mt-1">
+                                <input name="twitter" placeholder="Twitter" value={playerForm.twitter} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-xs text-white" />
+                                <input name="twitch" placeholder="Twitch" value={playerForm.twitch} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-xs text-white" />
+                                <input name="instagram" placeholder="Instagram" value={playerForm.instagram} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-xs text-white" />
+                                <input name="tiktok" placeholder="TikTok" value={playerForm.tiktok} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-xs text-white" />
+                                <input name="kick" placeholder="Kick" value={playerForm.kick} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-xs text-white" />
+                                <input name="youtube" placeholder="YouTube" value={playerForm.youtube} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 rounded text-xs text-white" />
+                            </div>
 
-                            {/* Setup */}
-                            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-3 border-t border-white/10 pt-3 mt-1">
+                            {/* Setup (Cambiado Monitor por Audifonos) */}
+                            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-3 pt-3">
                                 <div className="relative">
                                     <MousePointer2 size={14} className="absolute left-3 top-3 text-gray-500"/>
                                     <input name="mouse" placeholder="Mouse" value={playerForm.mouse} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 pl-9 rounded text-sm text-white w-full" />
@@ -261,27 +232,20 @@ export default function AdminEquipos() {
                                     <input name="keyboard" placeholder="Teclado" value={playerForm.keyboard} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 pl-9 rounded text-sm text-white w-full" />
                                 </div>
                                 <div className="relative">
-                                    <Monitor size={14} className="absolute left-3 top-3 text-gray-500"/>
-                                    <input name="monitor" placeholder="Monitor" value={playerForm.monitor} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 pl-9 rounded text-sm text-white w-full" />
+                                    <Headphones size={14} className="absolute left-3 top-3 text-gray-500"/>
+                                    <input name="headphones" placeholder="Audífonos" value={playerForm.headphones} onChange={handlePlayerChange} className="bg-black border border-white/20 p-2 pl-9 rounded text-sm text-white w-full" />
                                 </div>
                             </div>
                          </div>
 
                          <div className="flex gap-2 mt-4">
-                             {playerForm.id && (
-                                 <button onClick={resetPlayerForm} className="w-1/4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-bold uppercase text-xs rounded">
-                                     Cancelar
-                                 </button>
-                             )}
-                             <button onClick={handleSavePlayer} className={`flex-grow py-2 font-bold uppercase text-xs tracking-widest rounded transition-colors text-white ${playerForm.id ? 'bg-blue-600 hover:bg-blue-500' : 'bg-sk-accent hover:bg-pink-600'}`}>
-                                {playerForm.id ? 'Guardar Cambios' : 'Agregar al Roster'}
-                             </button>
+                             {playerForm.id && <button onClick={resetPlayerForm} className="w-1/4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-bold uppercase text-xs rounded">Cancelar</button>}
+                             <button onClick={handleSavePlayer} className={`flex-grow py-2 font-bold uppercase text-xs tracking-widest rounded transition-colors text-white ${playerForm.id ? 'bg-blue-600 hover:bg-blue-500' : 'bg-sk-accent hover:bg-pink-600'}`}>{playerForm.id ? 'Guardar Cambios' : 'Agregar al Roster'}</button>
                          </div>
                       </div>
                   </div>
                 </div>
               ) : (
-                /* MODO LECTURA */
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex-grow">
                     <div className="flex items-center gap-3 mb-2">
@@ -290,9 +254,7 @@ export default function AdminEquipos() {
                     </div>
                     <p className="text-gray-600 text-xs font-mono">/equipos/{team.slug}</p>
                   </div>
-                  <button onClick={() => handleEditClick(team)} className="bg-white/5 hover:bg-sk-accent hover:text-white text-gray-300 px-6 py-3 rounded border border-white/10 transition-colors flex items-center gap-2">
-                      <Edit size={18} /> Gestionar
-                  </button>
+                  <button onClick={() => handleEditClick(team)} className="bg-white/5 hover:bg-sk-accent hover:text-white text-gray-300 px-6 py-3 rounded border border-white/10 transition-colors flex items-center gap-2"><Edit size={18} /> Gestionar</button>
                 </div>
               )}
             </div>

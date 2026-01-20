@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
-
 // SEGURIDAD
 async function isAdmin() {
   const cookieStore = await cookies();
@@ -33,7 +32,7 @@ export async function GET(request: Request) {
   }
 }
 
-// 2. POST: Agregar Jugador (Con Foto)
+// 2. POST: Agregar Jugador
 export async function POST(request: Request) {
   if (!(await isAdmin())) return NextResponse.json({ message: "No autorizado" }, { status: 403 });
 
@@ -41,42 +40,46 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     
     // Procesar Imagen
-    const file = formData.get("photo_file") as File | null;
-    let photoUrl = ""; // Si no sube foto, queda vacía o se mantiene la anterior logicamente
+    const file = formData.get("photo_file") as any;
+    let photoUrl = ""; 
 
     if (file && file.size > 0) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      // Nombre seguro
       const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '');
       const fileName = `${Date.now()}-${safeName}`;
+      
       const uploadDir = path.join(process.cwd(), "public/uploads");
+      await mkdir(uploadDir, { recursive: true });
       const filePath = path.join(uploadDir, fileName);
       
       await writeFile(filePath, buffer);
       photoUrl = `/uploads/${fileName}`;
     }
 
-    // Extraer resto de datos
+    // Datos Básicos
     const game_id = formData.get("game_id");
     const nickname = formData.get("nickname");
     const role = formData.get("role");
     const country = formData.get("country") || "CL";
     const bio = formData.get("bio") || "";
     
-    // Si el usuario subió foto, usamos esa. Si no, revisamos si mandó una URL manual (opcional)
     const finalPhotoUrl = photoUrl || formData.get("photo_url") || "";
 
-    // Construir JSONs
+    // --- NUEVO: JSONs Actualizados (Redes Extra + Audífonos) ---
     const socials = JSON.stringify({
        twitter: formData.get("twitter"),
        twitch: formData.get("twitch"),
-       instagram: formData.get("instagram")
+       instagram: formData.get("instagram"),
+       tiktok: formData.get("tiktok"), // Nuevo
+       kick: formData.get("kick"),     // Nuevo
+       youtube: formData.get("youtube")// Nuevo
     });
+    
     const setup = JSON.stringify({
        mouse: formData.get("mouse"),
        keyboard: formData.get("keyboard"),
-       monitor: formData.get("monitor")
+       headphones: formData.get("headphones") // Nuevo (Reemplaza monitor conceptualmente)
     });
 
     await pool.query(
@@ -101,22 +104,17 @@ export async function PUT(request: Request) {
 
       if (!id) return NextResponse.json({ error: "Falta ID" }, { status: 400 });
 
-      // 1. Manejo de la Imagen
-      const file = formData.get("photo_file") as any; // Usamos 'any' temporalmente para evitar problemas de tipado estricto
+      // Imagen
+      const file = formData.get("photo_file") as any; 
       let photoUrl = formData.get("existing_photo_url") as string; 
 
-      // Verificación más robusta: revisamos si tiene nombre y tamaño
       if (file && file.name && file.size > 0) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        
-        // Limpiamos el nombre
         const safeName = file.name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9.-]/g, '');
         const fileName = `${Date.now()}-${safeName}`;
         
         const uploadDir = path.join(process.cwd(), "public/uploads");
-        
-        // --- FIX CRÍTICO: Aseguramos que la carpeta exista antes de escribir ---
         await mkdir(uploadDir, { recursive: true });
 
         const filePath = path.join(uploadDir, fileName);
@@ -125,26 +123,28 @@ export async function PUT(request: Request) {
         photoUrl = `/uploads/${fileName}`;
       }
 
-      // 2. Extracción de datos
+      // Datos
       const nickname = formData.get("nickname") || "";
       const role = formData.get("role") || "";
       const country = formData.get("country") || "CL";
       const bio = formData.get("bio") || "";
 
-      // 3. JSONs
+      // --- NUEVO: JSONs Actualizados ---
       const socials = JSON.stringify({
         twitter: formData.get("twitter") || "",
         twitch: formData.get("twitch") || "",
-        instagram: formData.get("instagram") || ""
+        instagram: formData.get("instagram") || "",
+        tiktok: formData.get("tiktok") || "",  // Nuevo
+        kick: formData.get("kick") || "",      // Nuevo
+        youtube: formData.get("youtube") || "" // Nuevo
       });
       
       const setup = JSON.stringify({
         mouse: formData.get("mouse") || "",
         keyboard: formData.get("keyboard") || "",
-        monitor: formData.get("monitor") || ""
+        headphones: formData.get("headphones") || "" // Nuevo
       });
   
-      // 4. Update
       await pool.query(
         'UPDATE roster SET nickname=?, role=?, country=?, bio=?, photo_url=?, socials=?, setup=? WHERE id=?',
         [nickname, role, country, bio, photoUrl, socials, setup, id]
@@ -152,7 +152,7 @@ export async function PUT(request: Request) {
   
       return NextResponse.json({ success: true });
     } catch (error: any) {
-      console.error("Error PUT Roster Completo:", error); // Esto saldrá en los logs de cPanel (stderr.log)
+      console.error("Error PUT Roster:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
