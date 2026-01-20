@@ -2,66 +2,63 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
-// Definimos los colores aquí para tenerlos centralizados
-const THEME_COLORS: Record<string, string> = {
-  blue: "#00f2ff", // Cyan original
-  pink: "#ff0099", // Rosa neón
-  green: "#39ff14", // Verde tóxico (extra)
-  purple: "#9333ea", // Morado (extra)
-};
-
 interface User {
   id: number;
   nickname: string;
   email: string;
   avatar?: string;
   role: string;
-  theme?: string;
+  theme?: string; // Ahora guardará el HEX ej: "#ff0000"
 }
 
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
-  currentTheme: string;
+  currentTheme: string; // Guardará el HEX actual
   isThemeModalOpen: boolean;
   openThemeModal: () => void;
   closeThemeModal: () => void;
-  applyTheme: (themeName: string) => void; 
-  saveThemeToDB: (themeName: string) => void;
+  applyTheme: (colorHex: string) => void; 
+  saveThemeToDB: (colorHex: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Color por defecto (Cyan D7D)
+const DEFAULT_COLOR = "#00f2ff";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [currentTheme, setCurrentTheme] = useState("blue");
+  const [currentTheme, setCurrentTheme] = useState(DEFAULT_COLOR);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const router = useRouter();
 
-  // --- FUNCIÓN CLAVE: CAMBIO DE COLOR ---
-  const applyTheme = (themeName: string) => {
-    const root = document.documentElement;
-    const colorHex = THEME_COLORS[themeName] || THEME_COLORS['blue'];
+  // --- APLICAR COLOR (Cualquier HEX) ---
+  const applyTheme = (colorHex: string) => {
+    if (!colorHex) return;
     
-    // Inyectamos el valor directamente en la variable CSS de Tailwind
+    // Inyectamos el valor HEX directamente en la variable CSS
+    const root = document.documentElement;
     root.style.setProperty('--color-sk-accent', colorHex);
     
-    setCurrentTheme(themeName);
-    localStorage.setItem("d7d-theme", themeName);
+    setCurrentTheme(colorHex);
+    localStorage.setItem("d7d-theme", colorHex);
   };
 
-  const saveThemeToDB = async (themeName: string) => {
-    applyTheme(themeName);
+  const saveThemeToDB = async (colorHex: string) => {
+    applyTheme(colorHex);
+    
     if (user) {
-      const updatedUser = { ...user, theme: themeName };
+      const updatedUser = { ...user, theme: colorHex };
       setUser(updatedUser);
       localStorage.setItem("d7d_user", JSON.stringify(updatedUser));
+      
       try {
         await fetch("/api/profile", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ theme: themeName }),
+          body: JSON.stringify({ theme: colorHex }),
         });
       } catch (error) {
         console.error("Error guardando tema", error);
@@ -70,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // 1. Cargar Usuario
     const storedUser = localStorage.getItem("d7d_user");
     let loadedUser: User | null = null;
     if (storedUser) {
@@ -77,15 +75,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(loadedUser);
     }
 
+    // 2. Cargar Tema
     const storedTheme = localStorage.getItem("d7d-theme");
     
-    // Prioridad: 1. Preferencia usuario BD, 2. LocalStorage, 3. Default Blue
+    // Lógica de prioridad: Usuario BD > LocalStorage > Default
     if (loadedUser?.theme) {
       applyTheme(loadedUser.theme);
     } else if (storedTheme) {
       applyTheme(storedTheme);
     } else {
-      applyTheme("blue");
+      applyTheme(DEFAULT_COLOR);
     }
   }, []);
 

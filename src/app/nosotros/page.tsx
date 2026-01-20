@@ -15,11 +15,11 @@ const SECTIONS = [
 
 // DATOS REALES DEL STAFF
 const STAFF_DATA = [
-  { name: "Cristian A. Calixto", role: "Fundador y Director General", image: "/staff/cristian.jpg" },
+  { name: "Cristian A. Calixto", role: "Fundador y Director General", image: "/staff/calixto.jpg" },
   { name: "Luigi S. Constanzi", role: "Co-Fundador", image: "/staff/luigi.jpg" },
-  { name: "Catalina A. Galleguillos", role: "Gerente de Redes Sociales", image: "/staff/catalina.jpg" },
-  { name: "Nicolas", role: "Desarrollador Principal", image: "/staff/nico.jpg" }, 
+  { name: "Catalina A. Galleguillos", role: "Gerente de Redes Sociales", image: "/staff/cata.jpg" },
   { name: "Jordan T. Olivares", role: "Manager de Equipo Competitivo", image: "/staff/jordan.jpg" },
+  { name: "Nicolas", role: "Desarrollador", image: "/staff/kpo.jpg" }, 
 ];
 
 function AboutContent() {
@@ -132,7 +132,7 @@ function AboutContent() {
             {/* IMAGEN INTERMEDIA (Nueva) */}
             <div className="w-full h-64 md:h-80 relative my-12 rounded-xl overflow-hidden border border-white/10 shadow-lg">
                {/* Reemplaza src por tu imagen real */}
-               <img src="/uploads/identidad.jpg" alt="Identidad Disp7aceD" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" 
+               <img src="/identidad.png" alt="Identidad Disp7aceD" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" 
                     onError={(e) => e.currentTarget.src = "/fondo.jpg"} 
                />
             </div>
@@ -158,8 +158,8 @@ function AboutContent() {
             
             {/* IMAGEN MUJERES GAMING (Nueva) */}
             <div className="w-full h-64 md:h-96 relative my-8 rounded-xl overflow-hidden border border-sk-accent/30 shadow-[0_0_30px_rgba(255,0,255,0.1)]">
-                 <img src="/uploads/mujeres-gaming.jpg" alt="Igualdad en Gaming" className="w-full h-full object-cover" 
-                      onError={(e) => e.currentTarget.src = "/fondo.jpg"}
+                 <img src="/mujeres-gaming.jpg" alt="Igualdad en Gaming" className="w-full h-full object-cover" 
+                      onError={(e) => e.currentTarget.src = "/mujeres-gaming.jpg"}
                  />
             </div>
             
