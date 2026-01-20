@@ -1,92 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  /* === COLORES BASE (Estilo SK Gaming / Dark Mode) === */
+  /* === COLORES BASE === */
   --color-sk-black: #050505;
   --color-sk-dark: #0f0f0f;
   --color-sk-text: #f0f0f0;
   
-  /* Color de Acento Principal (Por defecto Azul/Cyan) */
+  /* === COLOR MAESTRO (La magia ocurre aquí) === */
+  /* Definimos el valor por defecto (Cyan/Azul) */
   --color-sk-accent: #00f2ff; 
-
-  /* === PALETAS DE COLORES (Para uso manual) === */
-  /* Paleta 1: Tech Blue/Cyan */
-  --color-d7d-cyan: #00f2ff; 
-  --color-d7d-blue: #005fcc;
-
-  /* Paleta 2: Vibrant Pink */
-  --color-d7d-pink: #ff0080;
-  --color-d7d-purple: #7928ca;
-
-  /* === FUENTES === */
-  /* Conectamos las variables de next/font (layout.tsx) con Tailwind */
-  --font-sans: var(--font-oswald), ui-sans-serif, system-ui; 
-  --font-body: var(--font-inter), ui-sans-serif, system-ui;
 
   /* === ANIMACIONES === */
   --animate-fade-in: fade-in 0.5s ease-in-out;
+  --animate-fade-in-up: fade-in-up 0.5s ease-out;
   
   @keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
 }
 
-/* === ESTILOS BASE === */
+/* === ESTILOS GLOBALES === */
 body {
   background-color: var(--color-sk-black);
   color: var(--color-sk-text);
-  font-family: var(--font-sans); /* Por defecto usa Oswald */
-  overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  /* Aseguramos que el cambio de color sea suave */
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-/* === CLASES DE UTILIDAD === */
-.font-body {
-  font-family: var(--font-body); /* Para textos largos */
-}
-/* ... (Todo el código anterior se queda igual) ... */
-
-/* === TEMA ROSA: VERSIÓN INTENSA === */
-body.theme-pink {
-  /* Rosa Neón muy saturado */
-  --color-sk-accent: #ff0099;  
-  --color-d7d-cyan: #ff0099;   
-  /* Azul muy oscuro/Morado para el contraste */
-  --color-d7d-blue: #2a0a38;   
-  
-  --color-sk-text: #ffffff; 
-}
-
-/* EL FONDO MÁGICO (Copia y pega esto con cuidado) */
-body.theme-pink .hero-overlay {
-  /* Aquí está el truco de la "silueta":
-     Un degradado diagonal (120deg) que corta:
-     - 0% a 40%: Azul oscuro profundo (Sombra)
-     - 40% a 100%: Rosa vibrante semitransparente (Luz)
-  */
-  background: linear-gradient(
-    120deg, 
-    rgba(20, 10, 40, 0.95) 0%, 
-    rgba(42, 10, 56, 0.8) 40%, 
-    rgba(255, 0, 153, 0.5) 100%
-  );
-  
-  /* 'hard-light' o 'overlay' hacen que los colores "quemen" la imagen de fondo */
-  mix-blend-mode: hard-light; 
-}
-
-/* Agrega esto al final de globals.css */
-
+/* === UTILIDADES EXTRA === */
+/* Borde brillante inferior (Neon) */
 .neon-border-bottom {
-  /* Borde sólido delgado abajo */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  
-  /* La magia: Una sombra que usa tu color de acento (Azul o Rosa) */
   box-shadow: 0 4px 30px var(--color-sk-accent), 
               0 1px 0px var(--color-sk-accent);
-  
-  /* Aseguramos que pase por encima de otros elementos */
-  position: relative;
-  z-index: 50;
 }

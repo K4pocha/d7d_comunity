@@ -2,6 +2,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
+// Definimos los colores aquí para tenerlos centralizados
+const THEME_COLORS: Record<string, string> = {
+  blue: "#00f2ff", // Cyan original
+  pink: "#ff0099", // Rosa neón
+  green: "#39ff14", // Verde tóxico (extra)
+  purple: "#9333ea", // Morado (extra)
+};
+
 interface User {
   id: number;
   nickname: string;
@@ -15,14 +23,12 @@ interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
-  
-  // Nuevas funciones para el tema
   currentTheme: string;
   isThemeModalOpen: boolean;
   openThemeModal: () => void;
   closeThemeModal: () => void;
-  applyTheme: (themeName: string) => void; // Solo visual
-  saveThemeToDB: (themeName: string) => void; // Guardado real
+  applyTheme: (themeName: string) => void; 
+  saveThemeToDB: (themeName: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,35 +36,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [currentTheme, setCurrentTheme] = useState("blue");
-  
-  // Estado para controlar el Modal
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-  
   const router = useRouter();
 
-  // Función 1: Solo aplica CSS y guarda en localStorage (Rápido)
+  // --- FUNCIÓN CLAVE: CAMBIO DE COLOR ---
   const applyTheme = (themeName: string) => {
     const root = document.documentElement;
-    if (themeName === 'pink') {
-      root.style.setProperty('--color-sk-accent', '#ec4899');
-    } else {
-      root.style.setProperty('--color-sk-accent', '#22d3ee');
-    }
+    const colorHex = THEME_COLORS[themeName] || THEME_COLORS['blue'];
+    
+    // Inyectamos el valor directamente en la variable CSS de Tailwind
+    root.style.setProperty('--color-sk-accent', colorHex);
+    
     setCurrentTheme(themeName);
     localStorage.setItem("d7d-theme", themeName);
   };
 
-  // Función 2: Guarda en la BD (Lento, solo al confirmar)
   const saveThemeToDB = async (themeName: string) => {
-    // Primero aseguramos que esté aplicado localmente
     applyTheme(themeName);
-
-    // Si hay usuario, mandamos la petición a la API
     if (user) {
       const updatedUser = { ...user, theme: themeName };
       setUser(updatedUser);
       localStorage.setItem("d7d_user", JSON.stringify(updatedUser));
-
       try {
         await fetch("/api/profile", {
           method: "PUT",
@@ -66,13 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify({ theme: themeName }),
         });
       } catch (error) {
-        console.error("Error guardando tema en BD", error);
+        console.error("Error guardando tema", error);
       }
     }
   };
 
   useEffect(() => {
-    // 1. Cargar Usuario
     const storedUser = localStorage.getItem("d7d_user");
     let loadedUser: User | null = null;
     if (storedUser) {
@@ -80,21 +77,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(loadedUser);
     }
 
-    // 2. DETECTAR PRIMERA VISITA O TEMA GUARDADO
     const storedTheme = localStorage.getItem("d7d-theme");
     
+    // Prioridad: 1. Preferencia usuario BD, 2. LocalStorage, 3. Default Blue
     if (loadedUser?.theme) {
-      // Si el usuario tiene tema en BD, manda ese
       applyTheme(loadedUser.theme);
     } else if (storedTheme) {
-      // Si hay preferencia local, manda esa
       applyTheme(storedTheme);
     } else {
-      // --- MAGIA: PRIMERA VEZ ---
-      // Si no hay usuario NI tema local, es la primera vez (o limpiaron caché).
-      // Abrimos el modal automáticamente.
-      applyTheme("blue"); // Default
-      setIsThemeModalOpen(true);
+      applyTheme("blue");
     }
   }, []);
 
@@ -118,8 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isThemeModalOpen, 
       openThemeModal: () => setIsThemeModalOpen(true),
       closeThemeModal: () => setIsThemeModalOpen(false),
-      applyTheme,
-      saveThemeToDB 
+      applyTheme, saveThemeToDB 
     }}>
       {children}
     </AuthContext.Provider>
@@ -128,8 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth debe usarse dentro de un AuthProvider");
-  }
+  if (context === undefined) throw new Error("useAuth debe usarse dentro de un AuthProvider");
   return context;
 }
