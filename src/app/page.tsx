@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react"; // <--- IMPORTANTE: Agregados hooks
+import { useState, useEffect } from "react";
 import PartnerRow from "@/src/components/PartnerRow";
-import Image from "next/image";
+import Image from "next/image"; // Mantenemos Image para los assets estáticos (logo, fondo)
 import Link from "next/link";
 import socialLinks from "@/src/data/social-links.json"; 
-// import newsData from "@/src/data/news.json"; <--- ELIMINADO
-import { Users, Calendar } from "lucide-react"; // Agregué Calendar para la fecha
+import { Users, Calendar } from "lucide-react";
 
 const DiscordIcon = () => (
   <svg className="w-6 h-6" viewBox="0 0 127.14 96.36" fill="currentColor"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" /></svg>
@@ -21,15 +20,17 @@ export default function Home() {
     fetch("/api/news")
       .then((res) => res.json())
       .then((data) => {
-        // Tomamos solo las 3 primeras y formateamos los datos
+        // Tomamos solo las 3 primeras
         const recent = data.slice(0, 3).map((item: any) => ({
             id: item.id,
             title: item.title,
             image: item.image || "/news-placeholder.jpg",
             category: item.category || "General",
             date: new Date(item.created_at).toLocaleDateString("es-ES", { day: 'numeric', month: 'short', year: 'numeric' }),
-            // Creamos un extracto cortando el contenido
-            excerpt: item.content.substring(0, 100) + "..."
+            
+            // <--- CAMBIO 1: USAR SUMMARY (BAJADA) EN VEZ DE CORTAR CONTENT
+            // Si existe summary lo usa, si no, usa el fallback antiguo
+            excerpt: item.summary || (item.content ? item.content.substring(0, 100) + "..." : "Sin descripción.")
         }));
         setLatestNews(recent);
         setLoading(false);
@@ -116,17 +117,19 @@ export default function Home() {
              latestNews.map((news) => (
                 <Link key={news.id} href={`/noticias/${news.id}`}>
                     <article className="bg-[#111] border border-white/5 hover:border-sk-accent transition-all group cursor-pointer flex flex-col h-full hover:-translate-y-2 duration-300 rounded-xl overflow-hidden">
+                    
+                    {/* <--- CAMBIO 2: IMAGEN CON ETIQUETA <img> ESTÁNDAR PARA EVITAR ERROR 400 */}
                     <div className="h-64 bg-gray-900 relative overflow-hidden">
-                        <Image 
-                        src={news.image} 
-                        alt={news.title} 
-                        fill 
-                        className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
+                        <img 
+                          src={news.image} 
+                          alt={news.title} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
                         />
                         <div className="absolute top-0 left-0 bg-sk-accent text-white text-xs font-black px-3 py-1 uppercase skew-x-[-12deg] -ml-2 shadow-lg">
                             <span className="block skew-x-[12deg]">{news.category}</span>
                         </div>
                     </div>
+
                     <div className="p-8 flex flex-col flex-grow relative">
                         <div className="mb-3 text-xs text-sk-accent font-mono uppercase tracking-wider flex items-center gap-2">
                              <Calendar size={12}/> {news.date}
@@ -135,7 +138,7 @@ export default function Home() {
                         {news.title}
                         </h3>
                         <p className="text-gray-200 text-sm line-clamp-3 leading-relaxed">
-                        {news.excerpt}
+                        {news.excerpt} {/* Ahora muestra la bajada */}
                         </p>
                     </div>
                     </article>
@@ -154,7 +157,6 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-12 md:gap-20 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
              {/* AQUI VAN LOGOS DE SPONSORS  */}
              <div className="relative h-12 w-32 hover:opacity-100 transition-opacity cursor-pointer">
-                 {/* <Image src="/partners/logitech.png" alt="Sponsor1" fill className="object-contain"/>  <-- Descomenta cuando tengas logos */}
                  <div className="w-full h-full bg-white/10 rounded animate-pulse"></div>
              </div>
              <div className="relative h-16 w-32 hover:opacity-100 transition-opacity cursor-pointer">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "../../../context/AuthContext"; // Asegúrate que esta ruta sea la correcta en tu proyecto
+import { useAuth } from "../../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Save, Image as ImageIcon, Layout } from "lucide-react";
 
@@ -10,20 +10,17 @@ export default function CreateNewsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   
-  // ESTADOS SEPARADOS (Para manejar mejor los archivos)
   const [title, setTitle] = useState("");
+  const [summary, setSummary] = useState(""); // <--- NUEVO ESTADO
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState("General"); // Valor por defecto
-  const [file, setFile] = useState<File | null>(null); // Estado para el archivo de imagen
+  const [category, setCategory] = useState("General");
+  const [file, setFile] = useState<File | null>(null);
 
-  // PROTECCIÓN DE RUTA (FRONTEND)
   useEffect(() => {
     const storedUser = localStorage.getItem("d7d_user");
     if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.role !== 'ADMIN') {
-            router.push("/");
-        }
+        if (parsedUser.role !== 'ADMIN') router.push("/");
     } else {
          router.push("/login");
     }
@@ -33,18 +30,14 @@ export default function CreateNewsPage() {
     e.preventDefault();
     setLoading(true);
 
-    // USAMOS FORMDATA PARA ENVIAR ARCHIVOS Y TEXTO JUNTOS
     const formData = new FormData();
     formData.append("title", title);
+    formData.append("summary", summary); // <--- ENVIAMOS EL RESUMEN
     formData.append("content", content);
     formData.append("category", category);
     
-    // Solo agregamos la imagen si el usuario subió una
-    if (file) {
-      formData.append("image", file);
-    }
+    if (file) formData.append("image", file);
 
-    // Enviamos a la API (Nota: No hace falta poner Content-Type, fetch lo detecta solo)
     const res = await fetch("/api/news", {
       method: "POST",
       body: formData,
@@ -52,14 +45,13 @@ export default function CreateNewsPage() {
 
     if (res.ok) {
       alert("Noticia publicada exitosamente!");
-      router.push("/noticias"); // Redirigir al listado
+      router.push("/noticias");
     } else {
       alert("Error al publicar la noticia.");
     }
     setLoading(false);
   };
 
-  // Si no es admin visualmente mostramos nada
   if (!user || user.role !== 'ADMIN') return null;
 
   return (
@@ -78,24 +70,33 @@ export default function CreateNewsPage() {
           
           {/* TÍTULO */}
           <div>
-            <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Título del Artículo</label>
+            <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Título</label>
             <input 
               type="text" 
               className="w-full bg-white/5 border border-white/10 rounded-lg p-4 text-white font-bold text-lg focus:border-sk-accent focus:outline-none"
-              placeholder="Ej: DISP7ACED GANA EL TORNEO REGIONAL"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
+              placeholder="Ej: DISP7ACED GANA EL TORNEO"
+              value={title} onChange={(e) => setTitle(e.target.value)} required
             />
           </div>
 
-          {/* CATEGORÍA (NUEVO) */}
+          {/* BAJADA / RESUMEN (NUEVO) */}
+          <div>
+            <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Bajada (Resumen)</label>
+            <textarea 
+              rows={3}
+              className="w-full bg-white/5 border border-white/10 rounded-lg p-4 text-white text-sm focus:border-sk-accent focus:outline-none resize-none"
+              placeholder="Resumen corto que aparecerá en la tarjeta..."
+              value={summary} onChange={(e) => setSummary(e.target.value)} maxLength={250} required
+            />
+            <p className="text-[10px] text-gray-500 text-right mt-1">{summary.length}/250</p>
+          </div>
+
+          {/* CATEGORÍA */}
           <div>
             <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Categoría</label>
             <select
               className="w-full bg-white/5 border border-white/10 rounded-lg p-4 text-white font-bold focus:border-sk-accent focus:outline-none cursor-pointer"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              value={category} onChange={(e) => setCategory(e.target.value)}
             >
               <option value="General" className="bg-[#0a0a0a]">General</option>
               <option value="Lanzamiento" className="bg-[#0a0a0a]">Lanzamiento</option>
@@ -105,7 +106,7 @@ export default function CreateNewsPage() {
             </select>
           </div>
 
-          {/* SUBIR IMAGEN (NUEVO INPUT FILE) */}
+          {/* IMAGEN */}
           <div>
             <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Imagen de Portada</label>
             <div className="flex gap-2">
@@ -113,37 +114,25 @@ export default function CreateNewsPage() {
                     <ImageIcon size={20} className="text-gray-400"/>
                 </div>
                 <input 
-                  type="file" 
-                  accept="image/*"
+                  type="file" accept="image/*"
                   className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sk-accent file:text-white hover:file:bg-sk-accent/80 cursor-pointer"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      setFile(e.target.files[0]);
-                    }
-                  }}
+                  onChange={(e) => { if (e.target.files && e.target.files[0]) setFile(e.target.files[0]); }}
                 />
             </div>
-            <p className="text-[10px] text-gray-500 mt-2">* La imagen se guardará en tu servidor local.</p>
           </div>
 
           {/* CONTENIDO */}
           <div>
-            <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Contenido</label>
+            <label className="block text-xs font-bold uppercase text-gray-500 mb-2">Cuerpo de la Noticia</label>
             <textarea 
-              rows={10}
+              rows={12}
               className="w-full bg-white/5 border border-white/10 rounded-lg p-4 text-white focus:border-sk-accent focus:outline-none leading-relaxed"
-              placeholder="Escribe aquí el cuerpo de la noticia..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
+              placeholder="Escribe aquí el contenido completo..."
+              value={content} onChange={(e) => setContent(e.target.value)} required
             />
           </div>
 
-          {/* BOTÓN SUBMIT */}
-          <button 
-            disabled={loading}
-            className="w-full bg-sk-accent hover:bg-sk-accent/80 text-white font-black uppercase py-4 rounded-lg transition-all flex items-center justify-center gap-2"
-          >
+          <button disabled={loading} className="w-full bg-sk-accent hover:bg-sk-accent/80 text-white font-black uppercase py-4 rounded-lg transition-all flex items-center justify-center gap-2">
             {loading ? "Publicando..." : <><Save size={20}/> Publicar Ahora</>}
           </button>
 

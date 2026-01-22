@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+// import Image from "next/image"; <--- YA NO LO USAMOS PARA NOTICIAS DINÁMICAS
 import Link from "next/link";
 import { Calendar, ArrowRight, Filter, Layout } from "lucide-react";
 
@@ -10,19 +10,21 @@ export default function NewsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("Todas");
 
-  // 1. CARGAR DATOS REALES DESDE LA API
+  // 1. CARGAR DATOS REALES
   useEffect(() => {
     fetch("/api/news")
       .then((res) => res.json())
       .then((data) => {
-        // Adaptamos los datos de la BD para que encajen en el diseño
         const formattedNews = data.map((item: any) => ({
           id: item.id,
           title: item.title,
           image: item.image || "/news-placeholder.jpg",
-          category: item.category || "General", // Aquí ya lee la categoría real
+          category: item.category || "General",
           date: new Date(item.created_at).toLocaleDateString("es-ES", { day: 'numeric', month: 'short', year: 'numeric' }),
-          excerpt: item.content.substring(0, 150) + "...",
+          
+          // <--- CAMBIO 1: Lógica de Resumen (Bajada)
+          excerpt: item.summary || (item.content ? item.content.substring(0, 150) + "..." : "Leer más..."),
+          
           slug: item.id 
         }));
         
@@ -32,7 +34,7 @@ export default function NewsPage() {
       .catch((err) => console.error("Error cargando noticias:", err));
   }, []);
 
-  // 2. EXTRAER CATEGORÍAS ÚNICAS
+  // 2. EXTRAER CATEGORÍAS
   const categories = ["Todas", ...new Set(news.map((item) => item.category))];
 
   // 3. FILTRADO
@@ -92,13 +94,14 @@ export default function NewsPage() {
         {/* NOTICIA DESTACADA (HERO) */}
         {heroNews && (
           <Link href={`/noticias/${heroNews.id}`} className="group relative block w-full h-[500px] rounded-2xl overflow-hidden mb-12 border border-white/10">
-            <Image 
+            
+            {/* <--- CAMBIO 2: ETIQUETA IMG NORMAL */}
+            <img 
               src={heroNews.image} 
               alt={heroNews.title} 
-              fill 
-              className="object-cover transition-transform duration-700 group-hover:scale-105" 
-              priority 
+              className="w-full h-full object-cover absolute inset-0 transition-transform duration-700 group-hover:scale-105" 
             />
+            
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
             
             <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full md:w-2/3">
@@ -126,31 +129,33 @@ export default function NewsPage() {
         {/* GRID DE NOTICIAS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {gridNews.map((news) => (
-            <Link key={news.id} href={`/noticias/${news.id}`} className="group bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden hover:border-sk-accent/50 transition-all hover:-translate-y-1">
-              <div className="relative h-48 w-full overflow-hidden">
-                <Image 
+            <Link key={news.id} href={`/noticias/${news.id}`} className="group bg-[#0a0a0a] border border-white/10 rounded-xl overflow-hidden hover:border-sk-accent/50 transition-all hover:-translate-y-1 flex flex-col h-full">
+              <div className="relative h-48 w-full overflow-hidden shrink-0">
+                
+                {/* <--- CAMBIO 2: ETIQUETA IMG NORMAL */}
+                <img 
                   src={news.image} 
                   alt={news.title} 
-                  fill 
-                  className="object-cover transition-transform duration-500 group-hover:scale-110" 
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                 />
+                
                 <div className="absolute top-4 left-4">
                     <span className="px-2 py-1 bg-black/80 backdrop-blur text-white text-[10px] font-bold uppercase rounded border border-white/10">
                       {news.category}
                     </span>
                 </div>
               </div>
-              <div className="p-6">
+              <div className="p-6 flex flex-col flex-grow">
                 <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase mb-3">
                   <Calendar size={12} /> {news.date}
                 </div>
                 <h3 className="text-xl font-black italic text-white uppercase leading-snug mb-3 line-clamp-2 group-hover:text-sk-accent transition-colors">
                   {news.title}
                 </h3>
-                <p className="text-gray-400 text-sm line-clamp-3 mb-4 leading-relaxed">
+                <p className="text-gray-400 text-sm line-clamp-3 mb-4 leading-relaxed flex-grow">
                   {news.excerpt}
                 </p>
-                <div className="flex items-center justify-end text-sk-accent text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0">
+                <div className="mt-auto flex items-center justify-end text-sk-accent text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0">
                   Leer más <ArrowRight size={12} className="ml-1" />
                 </div>
               </div>

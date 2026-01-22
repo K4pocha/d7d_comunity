@@ -1,43 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation"; 
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, User, ArrowLeft, Layout, Share2, Trash2, Twitter, Facebook, Link as LinkIcon } from "lucide-react";
-import { useAuth } from "../../../context/AuthContext"; 
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ArticlePage() {
   const { id } = useParams();
   const router = useRouter();
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   
   const [news, setNews] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // 1. CARGAR NOTICIA
   useEffect(() => {
     if (id) {
-      // Nota: Si tu archivo de API es [id]/route.ts usa la ruta con ID. 
-      // Si es el route.ts general que hicimos antes, usamos query params o body.
-      // Asumiremos que el GET funciona bien como lo tenías.
-      fetch(`/api/news?id=${id}`) 
+      // Intentamos cargar por ID (asumiendo que tu API soporta ?id=X o traemos todas)
+      fetch(`/api/news?id=${id}`)
         .then((res) => {
-            // Intento de fallback: Si la API de lista devuelve todo, filtramos (o usamos endpoint específico)
-            // Si tu GET ya funcionaba, déjalo como estaba. Aquí asumo que traes la noticia.
-            if (!res.ok) return fetch('/api/news').then(r => r.json()).then(list => list.find((n:any) => n.id == id));
-            return res.json();
+             // Fallback común: si el endpoint singular falla, traemos la lista y filtramos
+             if (!res.ok) return fetch('/api/news').then(r => r.json()).then(list => list.find((n:any) => n.id == id));
+             return res.json();
         })
         .then((data) => {
-          if(!data) throw new Error("No data");
-          // Si la API devuelve un array (por el fallback), tomamos el primero o el objeto directo
+          // Si la API devolvió un array (por el fallback), buscamos el objeto
           const item = Array.isArray(data) ? data.find((n:any) => n.id == id) : data;
           
+          if (!item) throw new Error("Noticia no encontrada");
+
           setNews({
             ...item,
             date: new Date(item.created_at).toLocaleDateString("es-ES", { day: 'numeric', month: 'long', year: 'numeric' }),
             image: item.image || "/news-placeholder.jpg",
             author_name: item.author_name || "Admin D7D",
-            category: item.category || "General"
+            category: item.category || "General",
+            summary: item.summary || "" // <--- Cargamos el resumen
           });
           setLoading(false);
         })
@@ -48,12 +48,11 @@ export default function ArticlePage() {
     }
   }, [id]);
 
-  // --- 1. FUNCIÓN ELIMINAR CORREGIDA ---
+  // 2. FUNCIÓN ELIMINAR (Corregida con body JSON)
   const handleDelete = async () => {
-    if (!confirm("¿Estás seguro de que quieres eliminar esta noticia?")) return;
+    if (!confirm("¿Estás seguro de eliminar esta noticia?")) return;
 
     try {
-        // CORRECCIÓN: Enviamos el ID en el body, y apuntamos a /api/news
         const res = await fetch(`/api/news`, { 
             method: "DELETE",
             headers: { 'Content-Type': 'application/json' },
@@ -63,10 +62,9 @@ export default function ArticlePage() {
         if (res.ok) {
             alert("Noticia eliminada correctamente");
             router.push("/noticias");
-            router.refresh(); // Refrescar para limpiar caché
+            router.refresh();
         } else {
-            const err = await res.json();
-            alert("Error al eliminar: " + (err.message || "Desconocido"));
+            alert("Error al eliminar");
         }
     } catch (error) {
         console.error(error);
@@ -74,26 +72,22 @@ export default function ArticlePage() {
     }
   };
 
-  // --- 2. FUNCIÓN COMPARTIR (NATIVA) ---
+  // 3. FUNCIÓN COMPARTIR (Nativa Móvil)
   const handleNativeShare = async () => {
     if (navigator.share) {
         try {
             await navigator.share({
                 title: news.title,
-                text: `Mira esta noticia en D7D: ${news.title}`,
+                text: news.summary || news.title, // Usamos el resumen si existe
                 url: window.location.href,
             });
-        } catch (error) {
-            console.log("Compartir cancelado");
-        }
+        } catch (error) { console.log("Cancelado"); }
     } else {
-        // Fallback para PC: Copiar Link
         navigator.clipboard.writeText(window.location.href);
         alert("¡Enlace copiado al portapapeles!");
     }
   };
 
-  // Funciones para redes específicas (PC)
   const shareTwitter = () => {
     const text = encodeURIComponent(news.title);
     const url = encodeURIComponent(window.location.href);
@@ -156,12 +150,13 @@ export default function ArticlePage() {
         </div>
       </div>
 
-      {/* CUERPO */}
+      {/* CUERPO DEL ARTÍCULO */}
       <div className="max-w-7xl mx-auto px-4 mt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
-            {/* COLUMNA IZQUIERDA: Texto */}
+            {/* COLUMNA IZQUIERDA: Contenido */}
             <div className="lg:col-span-8">
+                {/* Info Autor */}
                 <div className="flex items-center gap-3 mb-8 border-b border-white/10 pb-6">
                     <div className="w-10 h-10 rounded bg-white/10 flex items-center justify-center text-white">
                          <User size={20} />
@@ -172,6 +167,14 @@ export default function ArticlePage() {
                     </div>
                 </div>
 
+                {/* --- AQUÍ ESTÁ LA MAGIA: BAJADA DESTACADA --- */}
+                {news.summary && (
+                    <div className="mb-10 text-xl md:text-2xl text-white font-light leading-relaxed italic border-l-4 border-sk-accent pl-6 py-2 bg-white/5 rounded-r-lg">
+                        "{news.summary}"
+                    </div>
+                )}
+
+                {/* Texto Principal */}
                 <div className="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed font-sans marker:text-sk-accent">
                     <div className="whitespace-pre-wrap">
                         {news.content}
@@ -189,7 +192,6 @@ export default function ArticlePage() {
                     </h3>
                     
                     <div className="grid grid-cols-1 gap-3 mb-4">
-                         {/* BOTÓN NATIVO (Móvil: Abre Insta/TikTok/WhatsApp) */}
                          <button onClick={handleNativeShare} className="flex items-center justify-center gap-2 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all font-bold text-xs uppercase">
                             <Share2 size={16} /> Compartir / Copiar Link
                          </button>
@@ -208,7 +210,6 @@ export default function ArticlePage() {
                          <p className="text-gray-500 text-xs mb-3 font-bold uppercase">Tags Relacionados</p>
                          <div className="flex flex-wrap gap-2">
                              <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded border border-white/5">#Esports</span>
-                             <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded border border-white/5">#Chile</span>
                              <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded border border-white/5">#{news.category}</span>
                          </div>
                     </div>
