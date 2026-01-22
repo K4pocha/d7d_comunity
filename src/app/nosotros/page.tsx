@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Image from "next/image";
-import { Trophy } from "lucide-react";
+import Image from "next/image"; // Nota: Aunque uses <img> para algunas cosas, este import no molesta
+import { Trophy, Download, Image as ImageIcon } from "lucide-react";
 
 // SECCIONES DEL MENÚ
 const SECTIONS = [
@@ -25,13 +25,27 @@ const STAFF_DATA = [
 function AboutContent() {
   const searchParams = useSearchParams();
   const [activeSection, setActiveSection] = useState("historia");
+  
+  // Estado para el Media Kit Dinámico
+  const [mediaItems, setMediaItems] = useState<any[]>([]);
 
+  // 1. Detectar sección por URL
   useEffect(() => {
     const section = searchParams.get("section");
     if (section) {
       setActiveSection(section);
     }
   }, [searchParams]);
+
+  // 2. Cargar Media Kit si estamos en la sección "brand"
+  useEffect(() => {
+    if (activeSection === 'brand') {
+      fetch('/api/media')
+        .then(res => res.json())
+        .then(data => setMediaItems(data))
+        .catch(err => console.error("Error cargando media kit:", err));
+    }
+  }, [activeSection]);
 
   return (
     <div className="pt-24 bg-[#050505] min-h-screen flex flex-col md:flex-row">
@@ -129,9 +143,8 @@ function AboutContent() {
                </p>
             </div>
 
-            {/* IMAGEN INTERMEDIA (Nueva) */}
+            {/* IMAGEN INTERMEDIA */}
             <div className="w-full h-64 md:h-80 relative my-12 rounded-xl overflow-hidden border border-white/10 shadow-lg">
-               {/* Reemplaza src por tu imagen real */}
                <img src="/identidad.png" alt="Identidad Disp7aceD" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-700" 
                     onError={(e) => e.currentTarget.src = "/fondo.jpg"} 
                />
@@ -156,10 +169,10 @@ function AboutContent() {
               Talento <span className="text-sk-accent">Sin Género</span>
             </h1>
             
-            {/* IMAGEN MUJERES GAMING (Nueva) */}
+            {/* IMAGEN MUJERES GAMING */}
             <div className="w-full h-64 md:h-96 relative my-8 rounded-xl overflow-hidden border border-sk-accent/30 shadow-[0_0_30px_rgba(255,0,255,0.1)]">
-                 <img src="/imagengenero.png" alt="Igualdad en Gaming" className="object-cover" 
-                      onError={(e) => e.currentTarget.src = "/imagengenero.png"}
+                 <img src="/imagengenero.png" alt="Igualdad en Gaming" className="w-full h-full object-cover" 
+                      onError={(e) => e.currentTarget.src = "/fondo.jpg"}
                  />
             </div>
             
@@ -169,7 +182,6 @@ function AboutContent() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
               <div>
-                {/* Títulos arreglados al mismo estilo que Historia */}
                 <h3 className="text-2xl font-black text-white uppercase italic mb-2">Nuestra Historia</h3>
                 <p className="text-gray-200 text-sm leading-relaxed">
                   Desde nuestros primeros años, Disp7aceD promovió un entorno inclusivo. Esta visión se consolidó con la creación histórica de nuestra <strong>división femenina</strong>.
@@ -185,31 +197,70 @@ function AboutContent() {
           </div>
         )}
 
-        {/* --- KIT DE MARCA --- */}
+        {/* --- KIT DE MARCA (DINÁMICO) --- */}
         {activeSection === "brand" && (
-          <div className="animate-fade-in max-w-4xl">
+          <div className="animate-fade-in max-w-6xl">
             <h1 className="text-5xl font-black uppercase italic mb-4 text-white">
               Media <span className="text-sk-accent">Kit</span>
             </h1>
             <p className="text-gray-200 mb-8">
-              Descarga nuestros logotipos oficiales y wallpapers para personalizar tu setup.
+              Recursos oficiales de Disp7aceD Network. Haz clic para visualizar o descargar.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="h-64 bg-[#111] rounded-xl flex flex-col items-center justify-center border border-white/10 hover:border-sk-accent cursor-pointer transition-all group relative overflow-hidden">
-                    <span className="z-10 font-bold uppercase text-xl text-white mb-2">Wallpapers PC</span>
-                    <span className="z-10 text-xs text-sk-accent uppercase tracking-widest">4K & Ultrawide</span>
-                    <Image src="/fondo.jpg" fill className="object-cover opacity-30 group-hover:opacity-60 transition-opacity duration-500" alt="wp" />
-                </div>
-                 <div className="h-64 bg-[#111] rounded-xl flex flex-col items-center justify-center border border-white/10 hover:border-white cursor-pointer transition-all group relative overflow-hidden">
-                    <span className="z-10 font-bold uppercase text-xl text-white mb-2">Logotipos</span>
-                    <span className="z-10 text-xs text-gray-400 uppercase tracking-widest">Vector & PNG</span>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80" />
-                </div>
+
+            {/* SECCIÓN WALLPAPERS */}
+            <h3 className="text-2xl font-black uppercase italic text-white mb-4 border-l-4 border-sk-accent pl-3">Wallpapers</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {mediaItems.filter((i: any) => i.type === 'wallpaper').length > 0 ? (
+                mediaItems.filter((i: any) => i.type === 'wallpaper').map((item: any) => (
+                  <div key={item.id} className="group relative h-48 bg-[#111] rounded-xl overflow-hidden border border-white/10 hover:border-sk-accent transition-all">
+                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent p-4 flex flex-col justify-end">
+                       <span className="font-bold text-white uppercase">{item.title}</span>
+                       <a 
+                         href={item.image_url} 
+                         download 
+                         target="_blank"
+                         className="mt-2 bg-sk-accent text-black text-xs font-bold uppercase py-2 px-4 rounded text-center hover:brightness-110 flex items-center justify-center gap-2"
+                       >
+                         <Download size={14}/> Descargar
+                       </a>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm italic">No hay wallpapers disponibles aún.</p>
+              )}
+            </div>
+
+            {/* SECCIÓN LOGOS */}
+            <h3 className="text-2xl font-black uppercase italic text-white mb-4 border-l-4 border-white pl-3">Logotipos</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {mediaItems.filter((i: any) => i.type === 'logo').length > 0 ? (
+                mediaItems.filter((i: any) => i.type === 'logo').map((item: any) => (
+                  <div key={item.id} className="bg-[#111] p-6 rounded-xl border border-white/10 flex flex-col items-center justify-center group hover:border-white transition-all">
+                     <div className="relative w-24 h-24 mb-4">
+                        <img src={item.image_url} alt={item.title} className="w-full h-full object-contain" />
+                     </div>
+                     <p className="text-xs font-bold text-gray-400 uppercase mb-3 text-center">{item.title}</p>
+                     <a 
+                       href={item.image_url} 
+                       download 
+                       target="_blank"
+                       className="text-white hover:text-sk-accent transition-colors"
+                       title="Descargar"
+                     >
+                       <Download size={20} />
+                     </a>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm italic">No hay logotipos disponibles aún.</p>
+              )}
             </div>
           </div>
         )}
 
-        {/* --- STAFF (Datos reales + Diseño Tarjetas) --- */}
+        {/* --- STAFF (Datos reales + Diseño Integrado) --- */}
         {activeSection === "staff" && (
           <div className="animate-fade-in max-w-5xl">
             <h1 className="text-5xl font-black uppercase italic mb-8 text-white">
@@ -227,13 +278,13 @@ function AboutContent() {
                        <img 
                          src={member.image} 
                          alt={member.name} 
-                         className="w-full h-full object-cover group-hover:scale-105"
-                         onError={(e) => e.currentTarget.src = "/placeholder-user.jpg"} // Fallback si no hay foto
+                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         onError={(e) => e.currentTarget.src = "/placeholder-user.jpg"} // Fallback
                        />
                        {/* Overlay gradiente */}
                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
                        
-                       {/* Info sobre la imagen (estilo moderno) */}
+                       {/* Info sobre la imagen */}
                        <div className="absolute bottom-0 left-0 w-full p-4">
                            <h3 className="text-xl font-black text-white uppercase italic leading-none mb-1">{member.name}</h3>
                            <p className="text-xs text-sk-accent font-bold tracking-widest uppercase">{member.role}</p>
