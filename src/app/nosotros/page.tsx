@@ -15,11 +15,11 @@ const SECTIONS = [
 
 // DATOS REALES DEL STAFF
 const STAFF_DATA = [
-  { name: "Cristian A. Calixto", role: "Fundador y Director General", image: "/staff/calixto.jpg" },
-  { name: "Luigi S. Constanzi", role: "Co-Fundador", image: "/staff/luigi.jpg" },
-  { name: "Catalina A. Galleguillos", role: "Gerente de Redes Sociales", image: "/staff/cata.jpg" },
-  { name: "Jordan T. Olivares", role: "Manager de Equipo Competitivo", image: "/staff/jordan.jpg" },
-  { name: "Nicolas", role: "Desarrollador", image: "/staff/kpo.jpg" }, 
+  { name: "Cristian A. Calixto", role: "Fundador y Director General", image: "/staff/perfilhombre.png" },
+  { name: "Luigi S. Constanzi", role: "Co-Fundador", image: "/staff/perfilhombre.png" },
+  { name: "Catalina A. Galleguillos", role: "Gerente de Redes Sociales", image: "/staff/perfilmujer.png" },
+  { name: "Jordan T. Olivares", role: "Manager de Equipo Competitivo", image: "/staff/perfilhombre.png" },
+  { name: "Nicolas Oñate", role: "Desarrollador", image: "/staff/perfilhombre.png" }, 
 ];
 
 function AboutContent() {
@@ -158,8 +158,8 @@ function AboutContent() {
             
             {/* IMAGEN MUJERES GAMING (Nueva) */}
             <div className="w-full h-64 md:h-96 relative my-8 rounded-xl overflow-hidden border border-sk-accent/30 shadow-[0_0_30px_rgba(255,0,255,0.1)]">
-                 <img src="/mujeres-gaming.jpg" alt="Igualdad en Gaming" className="w-full h-full object-cover" 
-                      onError={(e) => e.currentTarget.src = "/mujeres-gaming.jpg"}
+                 <img src="/imagengenero.png" alt="Igualdad en Gaming" className="object-cover" 
+                      onError={(e) => e.currentTarget.src = "/imagengenero.png"}
                  />
             </div>
             
@@ -227,7 +227,7 @@ function AboutContent() {
                        <img 
                          src={member.image} 
                          alt={member.name} 
-                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-100 group-hover:scale-105"
+                         className="w-full h-full object-cover group-hover:scale-105"
                          onError={(e) => e.currentTarget.src = "/placeholder-user.jpg"} // Fallback si no hay foto
                        />
                        {/* Overlay gradiente */}

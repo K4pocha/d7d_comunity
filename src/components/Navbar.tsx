@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown, User, LogOut, Settings, LayoutDashboard, Edit3, Swords } from "lucide-react";
 import StreamBar from "./StreamBar";
 import MegaMenu from "./MegaMenu";
-import ThemeToggle from "../components/ThemeToggle";
+import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../context/AuthContext";
 
 
