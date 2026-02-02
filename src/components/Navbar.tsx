@@ -72,6 +72,7 @@ export default function Navbar() {
                 <MegaMenu />
               </div>
               <Link href="/equipos" className={navLinkClass("/equipos")}>Equipos</Link>
+              <Link href="/torneos" className={navLinkClass("/torneos")}>Torneos</Link>
               <Link href="/noticias" className={navLinkClass("/noticias")}>Noticias</Link>
             </div>
           </div>
