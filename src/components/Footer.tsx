@@ -1,7 +1,7 @@
 "use client";
 
-import { Twitter, Instagram, Youtube, Twitch } from "lucide-react";
-import socialLinks from "../data/social-links.json"; // Asegúrate de agregar "tiktok": "url..." aquí
+import { Twitter, Instagram, Youtube, Twitch, Mail } from "lucide-react";
+import socialLinks from "../data/social-links.json"; 
 import { useEffect } from "react";
 import { FaTiktok } from "react-icons/fa";
 
@@ -15,10 +15,11 @@ const DiscordIcon = ({ size = 20 }: { size?: number }) => (
 export default function Footer() {
   const socialNetworks = [
     { icon: DiscordIcon, href: socialLinks.discord, label: "Discord" },
+    { icon: Instagram, href: "https://www.instagram.com/d7d.cl/", label: "Instagram" },
     { icon: FaTiktok, href: socialLinks.tiktok, label: "TikTok" },
   ];
 
-  // Filtramos solo las que tengan link definido
+  // Filtramos solo las que tengan link definido (o en el caso de Instagram, que ya lo pusimos manual)
   const activeNetworks = socialNetworks.filter(social => social.href && social.href !== "");
 
   // EFECTO HACKER: Mensaje en la consola
@@ -38,13 +39,23 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-10">
 
         {/* TEXTO */}
-        <div>
+        <div className="text-center md:text-left">
           <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-800 opacity-90 py-4 px-1 leading-normal">
             SIGUENOS
           </h2>
-          <p className="text-gray-500 mt-0 uppercase tracking-widest text-sm px-3">
-            Se parte de #Disp7aceDNetwork
-          </p>
+          
+          <div className="flex flex-col gap-2 px-3 mt-[-10px]">
+            <p className="text-gray-500 uppercase tracking-widest text-sm font-bold">
+              SER PARTE DE DISP7ACED
+            </p>
+            <a 
+              href="mailto:contacto@d7d.cl" 
+              className="text-gray-400 hover:text-[#ec4899] transition-colors duration-300 text-sm flex items-center justify-center md:justify-start gap-2"
+            >
+              <Mail size={16} />
+              contacto@d7d.cl
+            </a>
+          </div>
         </div>
 
         {/* ICONOS */}
@@ -56,7 +67,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={social.label}
-              className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-sk-accent hover:text-white transition-all duration-300 text-gray-400 hover:scale-110 hover:shadow-[0_0_15px_var(--color-sk-accent)]"
+              className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center hover:bg-[#ec4899] hover:text-white transition-all duration-300 text-gray-400 hover:scale-110 hover:shadow-[0_0_15px_#ec4899]"
             >
               <social.icon size={20} />
             </a>
@@ -76,10 +87,10 @@ export default function Footer() {
           href="https://k4pocha.vercel.app" 
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs uppercase font-bold tracking-widest text-gray-700 hover:text-sk-accent transition-colors duration-300 flex items-center gap-2 group"
+          className="text-xs uppercase font-bold tracking-widest text-gray-700 hover:text-[#ec4899] transition-colors duration-300 flex items-center gap-2 group"
         >
           <span>Developed by</span>
-          <span className="group-hover:underline decoration-sk-accent underline-offset-4">
+          <span className="group-hover:underline decoration-[#ec4899] underline-offset-4">
             K4pocha 
           </span>
         </a>
