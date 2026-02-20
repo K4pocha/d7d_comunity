@@ -18,52 +18,6 @@ async function getUserSession() {
   } catch (error) { return null; }
 }
 
-// --- NUEVA FUNCIÓN: ENVIAR A DISCORD ---
-async function sendToDiscord(newsData: any) {
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL; // Importante para que las imágenes se vean
-
-  if (!webhookUrl || !siteUrl) {
-    console.warn("⚠️ Faltan variables de entorno para Discord (DISCORD_WEBHOOK_URL o NEXT_PUBLIC_SITE_URL)");
-    return;
-  }
-
-  // Construimos la URL absoluta de la imagen
-  // Si la imagen ya es http... la dejamos, si es /uploads... le pegamos el dominio
-  const imageUrl = newsData.image.startsWith("http") 
-    ? newsData.image 
-    : `${siteUrl}${newsData.image}`;
-
-  const embed = {
-    title: newsData.title,
-    description: newsData.summary || "¡Nueva noticia publicada en la comunidad!",
-    url: `${siteUrl}/noticias/${newsData.id}`, // Enlace directo a la noticia
-    color: 0x00FF00, // Color verde (puedes cambiarlo)
-    image: {
-      url: imageUrl
-    },
-    footer: {
-      text: `Categoría: ${newsData.category} • Publicado por Admin`
-    },
-    timestamp: new Date().toISOString()
-  };
-
-  try {
-    await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: "Noticias D7D", // El nombre que tendrá el bot
-        embeds: [embed],
-      }),
-    });
-    console.log("✅ Noticia enviada a Discord correctamente.");
-  } catch (error) {
-    console.error("❌ Error enviando a Discord:", error);
-    // No lanzamos error para no romper la creación de la noticia si Discord falla
-  }
-}
-
 // 1. CREAR NOTICIA (POST)
 export async function POST(request: Request) {
   try {
@@ -94,29 +48,12 @@ export async function POST(request: Request) {
       imageUrl = `/uploads/${fileName}`;
     }
 
-    // --- MODIFICACIÓN AQUÍ ---
-    // Necesitamos capturar el resultado para obtener el ID de la nueva noticia
-    // Usamos 'any' para evitar quejas de TypeScript sobre la estructura de retorno de mysql2
     const [result]: any = await pool.query(
       "INSERT INTO news (title, summary, content, category, image, author_id) VALUES (?, ?, ?, ?, ?, ?)",
       [title, summary || "", content, category || "General", imageUrl, user.id]
     );
-    
-    // Obtenemos el ID de la fila recién insertada
-    const newNewsId = result.insertId;
 
-    // --- DISPARAR WEBHOOK ---
-    // Llamamos a la función de forma asíncrona pero sin 'await' bloqueante 
-    // si quieres que responda rápido al usuario, o con 'await' si quieres asegurar el envío.
-    await sendToDiscord({
-      id: newNewsId,
-      title,
-      summary,
-      category: category || "General",
-      image: imageUrl
-    });
-
-    return NextResponse.json({ message: "Noticia publicada", id: newNewsId });
+    return NextResponse.json({ message: "Noticia publicada", id: result.insertId });
 
   } catch (error) {
     console.error(error);

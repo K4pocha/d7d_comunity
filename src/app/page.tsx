@@ -1,8 +1,11 @@
+"use client"; // Obligatorio para usar useState y useEffect
+
+import { useState, useEffect } from "react";
 import PartnerRow from "@/src/components/PartnerRow";
 import Image from "next/image";
 import Link from "next/link";
 import socialLinks from "@/src/data/social-links.json"; 
-import { Users } from "lucide-react"; 
+import { Users, Calendar } from "lucide-react"; 
 
 // Icono Discord
 const DiscordIcon = () => (
@@ -12,6 +15,30 @@ const DiscordIcon = () => (
 );
 
 export default function Home() {
+  // 1. ESTADO: Aquí guardamos las noticias que vienen de la API
+  const [latestNews, setLatestNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 2. EFECTO: Se ejecuta al cargar la página para pedir las noticias
+  useEffect(() => {
+    fetch("/api/news")
+      .then((res) => res.json())
+      .then((data) => {
+        // Tomamos solo las primeras 3 noticias para la portada
+        const formatted = Array.isArray(data) ? data.slice(0, 3).map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          excerpt: item.summary,
+          date: new Date(item.created_at).toLocaleDateString(),
+          image: item.image || "/news-placeholder.jpg",
+          category: item.category || "General"
+        })) : [];
+        setLatestNews(formatted);
+      })
+      .catch((err) => console.error("Error cargando noticias:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="flex flex-col">
 
@@ -66,38 +93,44 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* 2. AQUI YA NO USAMOS [1,2,3], USAMOS newsData */}
-          {newsData.map((news) => (
-            <article key={news.id} className="bg-sk-dark border border-white/5 hover:border-sk-accent transition-colors group cursor-pointer flex flex-col h-full">
-              
-              {/* IMAGEN DE LA NOTICIA */}
-              <div className="h-64 bg-gray-800 relative overflow-hidden">
-                {/* NOTA: Cuando tengas las imágenes reales, descomenta el componente <Image> de abajo
-                   y borra el div gris. Por ahora dejaremos el div gris pero usando el path si quisieras.
-                */}
-                
-                {/* <Image src={news.image} alt={news.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" /> */}
-                
-                <div className="absolute inset-0 bg-gray-700 group-hover:scale-105 transition-transform duration-500 flex items-center justify-center text-gray-500">
-                    Imagen: {news.image}
-                </div>
+          
+          {loading ? (
+             <div className="col-span-3 text-center py-10 text-gray-500 animate-pulse uppercase tracking-widest font-bold text-xs">
+                Cargando noticias desde la base de datos...
+             </div>
+          ) : (
+             latestNews.map((news) => (
+                <Link key={news.id} href={`/noticias/${news.id}`}>
+                    <article className="bg-[#111] border border-white/5 hover:border-sk-accent transition-all group cursor-pointer flex flex-col h-full hover:-translate-y-2 duration-300 rounded-xl overflow-hidden">
+                    
+                    {/* IMAGEN DE LA NOTICIA */}
+                    <div className="h-64 bg-gray-900 relative overflow-hidden">
+                        <img 
+                          src={news.image} 
+                          alt={news.title} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
+                        />
+                        <div className="absolute top-0 left-0 bg-sk-accent text-white text-xs font-black px-3 py-1 uppercase skew-x-[-12deg] -ml-2 shadow-lg">
+                            <span className="block skew-x-[12deg]">{news.category}</span>
+                        </div>
+                    </div>
 
-                <div className="absolute top-4 left-4 bg-sk-accent text-white text-xs font-bold px-2 py-1 uppercase">
-                  {news.category}
-                </div>
-              </div>
+                    <div className="p-8 flex flex-col flex-grow relative">
+                        <div className="mb-3 text-xs text-sk-accent font-mono uppercase tracking-wider flex items-center gap-2">
+                             <Calendar size={12}/> {news.date}
+                        </div>
+                        <h3 className="text-xl font-bold mb-4 leading-tight text-white group-hover:text-sk-accent transition-colors line-clamp-2">
+                        {news.title}
+                        </h3>
+                        <p className="text-gray-200 text-sm line-clamp-3 leading-relaxed">
+                        {news.excerpt}
+                        </p>
+                    </div>
+                    </article>
+                </Link>
+             ))
+          )}
 
-              <div className="p-8 flex flex-col flex-grow">
-                <div className="mb-2 text-xs text-gray-500 font-mono">{news.date}</div>
-                <h3 className="text-2xl font-bold mb-4 leading-tight group-hover:text-sk-accent transition-colors">
-                  {news.title}
-                </h3>
-                <p className="text-gray-400 text-sm line-clamp-3">
-                  {news.excerpt}
-                </p>
-              </div>
-            </article>
-          ))}
         </div>
       </section>
     </div>
